@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.diffplug.spotless'
 }
 
 repositories {
@@ -23,4 +24,11 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+spotless {
+	java {
+		palantirJavaFormat('2.39.0')
+		target("src/**/*.java")
+	}
 }

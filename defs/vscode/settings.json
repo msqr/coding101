@@ -1,0 +1,12 @@
+// copy these settings into ../../.vscode/settings.json
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "[java]": {
+    "spotlessGradle.format.enable": true,
+    "spotlessGradle.diagnostics.enable": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.spotlessGradle": true
+    }
+  },
+  "editor.formatOnSave": true
+}

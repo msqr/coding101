@@ -10,10 +10,3 @@ repositories {
 dependencies {
     implementation 'com.diffplug.spotless:spotless-plugin-gradle:6.23.3'
 }
-
-spotless {
-	java {
-		palantirJavaFormat('2.39.0')
-		target("src/**/*.java")
-	}
-}

@@ -1,4 +1,5 @@
 plugins {
-    id 'coding101.java-common-conventions'
-    id 'application'
+    id "coding101.java-common-conventions"
+    id "application"
+    id "com.github.johnrengelman.shadow"
 }

@@ -7,6 +7,5 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.spotlessGradle": true
     }
-  },
-  "editor.formatOnSave": true
+  }
 }

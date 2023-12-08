@@ -34,6 +34,10 @@ public class HelloWorld {
 
     public static void main(String[] args) {
         System.out.println("Hello, world!");
+
+        // print out all provided arguments with a `for` loop over `args`. In Java every array has a `length`
+        // property that tells you how many elements are in the array. You access properties with a `.`
+        // delimiter, just like JavaScript... so `args.length` here.
         for (var i = 0; i < args.length; i++) {
             System.out.println("Arg %d: %s".formatted(i, args[i]));
         }

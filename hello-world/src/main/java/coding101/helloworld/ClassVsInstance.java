@@ -8,7 +8,7 @@ public class ClassVsInstance {
             args = new String[] {"Hello, world."};
         }
 
-        // Use a for loop to loop over each argument
+        // Use a for loop to iterate over each argument one by one
         for (int i = 0; i < args.length; i++) {
             // Create an *instance* of the `Message` *class* using `new`. The `new` keyword invokes a special
             // class method called a **constructor**. The implied return value of a constructor is an

@@ -1,0 +1,19 @@
+plugins {
+    id 'coding101.java-application-conventions'
+}
+
+dependencies {
+    implementation project(':utilities')
+}
+
+application {
+    mainClass = 'coding101.ttt.TickTackToe'
+}
+
+task runWithJavaExec(type: JavaExec) {
+	group = "Execution"
+	description = "Run Tick Tack Toe"
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'coding101.ttt.TickTackToe'
+	standardInput = System.in
+}

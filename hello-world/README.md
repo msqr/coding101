@@ -1,5 +1,6 @@
 # Hello, World!
 
+Learn how to run a Java program that prints out _Hello, world!_ to the console.
 See the source in [HelloWorld.java](src/main/java/coding101/helloworld/HelloWorld.java).
 
 Run like this:

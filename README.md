@@ -4,7 +4,8 @@ Learn the basics of coding using Java. Let's go!
 
 # VS Code settings
 
-If you use VS Code, copy the settings to enable automatic formatting:
+If you use VS Code, install the **Spotless Gradle** extension, then copy the settings to
+enable automatic formatting:
 
 ```sh
 mkdir .vscode

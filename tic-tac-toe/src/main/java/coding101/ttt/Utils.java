@@ -47,12 +47,25 @@ public final class Utils {
      * @throws IOException if any I/O error occurs
      */
     public static void printBoard(Status[][] board, BufferedWriter out) throws IOException {
-        final var height = board.length;
-        for (var y = 0; y < height; y++) {
-            final var width = board[y].length;
+        final var size = board.length; // assume square board!
+
+        // draw header row
+        out.write("   ");
+        for (int x = 0; x < size; x++) {
+            if (x > 0) {
+                out.write(' ');
+            }
+            out.write(' ');
+            out.write(Character.valueOf((char) ('A' + x)));
+            out.write(' ');
+        }
+        out.write("\n\n");
+
+        for (var y = 0; y < size; y++) {
             if (y > 0) {
                 // draw a row delimiter
-                for (var x = 0; x < width; x++) {
+                out.write("   ");
+                for (var x = 0; x < size; x++) {
                     if (x > 0) {
                         out.write("┼");
                     }
@@ -61,7 +74,10 @@ public final class Utils {
 
                 out.append('\n');
             }
-            for (var x = 0; x < width; x++) {
+            out.write(String.valueOf(y + 1));
+            out.write("  ");
+
+            for (var x = 0; x < size; x++) {
                 if (x > 0) {
                     out.write("│");
                 }

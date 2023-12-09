@@ -10,11 +10,3 @@ dependencies {
 application {
     mainClass = 'coding101.helloworld.HelloWorld'
 }
-
-task runWithJavaExec(type: JavaExec) {
-	group = "Execution"
-	description = "Run Application"
-	classpath = sourceSets.test.runtimeClasspath
-	mainClass = 'coding101.helloworld.HelloWorld'
-	standardInput = System.in
-}

@@ -16,3 +16,7 @@ cp defs/vscode/settings.json .vscode
 
 Start with the [hello-world](./hello-world/) project to learn some basics of Java syntax.
 
+# Group 2: Tic Tac Toe
+
+The [tic-tac-toe](./tic-tac-toe/) project is an incomplete Tic Tac Toe game. Complete the
+game to learn about arrays and array-based algorithms.

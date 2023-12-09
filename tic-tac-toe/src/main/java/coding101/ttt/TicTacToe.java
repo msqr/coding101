@@ -16,8 +16,27 @@ public class TicTacToe {
 
     /**
      * The current game board.
+     *
+     * The board is implemented as a 2D array.
      * Each array element represents a "row" in the game, and there are {@code size} rows.
      * Each row array element represents a specific "column" in the game, and there are {@code size} columns.
+     *
+     * Visualize the 2D array like this:
+     *
+     * ┌─────────────────┐
+     * │    ┌───────────┐│
+     * │ 0: │ 0 │ 1 │ 2 ││
+     * │    └───────────┘│
+     * ├─────────────────┤
+     * │    ┌───────────┐│
+     * │ 1: │ 0 │ 1 │ 2 ││
+     * │    └───────────┘│
+     * ├─────────────────┤
+     * │    ┌───────────┐│
+     * │ 2: │ 0 │ 1 │ 2 ││
+     * │    └───────────┘│
+     * └─────────────────┘
+     *
      * A {@code null} row element value represents an unused square, that can be "occupied" by
      * a {@code Status} value (that is, X or O).
      */

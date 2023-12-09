@@ -33,7 +33,7 @@ public class ImportsAndLogging {
             // Using `debug()` log level here, and notice how template parameters are supported with `{}`
             // placeholders, follwed by the list of values to use. The `{}` placeholders are replaced in
             // the same order as the arguments passed in, here `i` and `args[i]`.
-            log.debug("Arg {}: {}}", i, args[i]);
+            log.debug("Arg {}: {}", i, args[i]);
         }
     }
 }

@@ -80,9 +80,15 @@ public class TicTacToe {
                 Utils.printBoard(board, out);
 
                 if (isWon(coord)) {
-                    // TODO
+                    out.write('\n');
+                    out.write("Player %s wins!\n".formatted(next));
+                    out.flush();
+                    return;
                 } else if (isDraw()) {
-
+                    out.write('\n');
+                    out.write("It's a draw!\n");
+                    out.flush();
+                    return;
                 } else {
                     // switch to next player
                     next = (next == Status.X ? Status.O : Status.X);

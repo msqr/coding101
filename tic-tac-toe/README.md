@@ -218,7 +218,9 @@ int size = 3;
 
 # Goal 1: complete game
 
-There are 3 methods in the `coding101.ttt.TicTacToe` class that need to be implemented:
+There are 3 methods in the `coding101.ttt.TicTacToe` class that need to be implemented to complete
+the game. You should **only make changes in the `TicTacToe` class**. Refer to the `Coordinate` and
+`Status` classes for reference.
 
 ## 1.1 Validate player move
 

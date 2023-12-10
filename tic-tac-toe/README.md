@@ -195,14 +195,15 @@ Here is a picture of a finished game where player `X` has won:
 ```
 
 How would you access the player's 3 coordinates that earned them the win? Fill in the necessary array
-indicies in this template (the order is **not** important):
+indicies in this template, going from **left to right** with the winning coordinates as the `move1`,
+`move2`, and `move3` variables here:
 
 ```java
-var move1 = board[   ][   ];
+var move1 = board[   ][   ]; // bottom-left space
 
-var move2 = board[   ][   ];
+var move2 = board[   ][   ]; // bottom-middle space
 
-var move3 = board[   ][   ];
+var move3 = board[   ][   ]; // bottom-right space
 ```
 
 ### Board size constant

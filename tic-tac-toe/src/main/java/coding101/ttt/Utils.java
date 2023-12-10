@@ -51,6 +51,9 @@ public final class Utils {
 
         // draw header row
         out.write("   ");
+        if (size > 9) {
+            out.write(' ');
+        }
         for (int x = 0; x < size; x++) {
             if (x > 0) {
                 out.write(' ');
@@ -65,6 +68,9 @@ public final class Utils {
             if (y > 0) {
                 // draw a row delimiter
                 out.write("   ");
+                if (size > 9) {
+                    out.write(' ');
+                }
                 for (var x = 0; x < size; x++) {
                     if (x > 0) {
                         out.write("┼");
@@ -73,6 +79,9 @@ public final class Utils {
                 }
 
                 out.append('\n');
+            }
+            if (size > 9 && y < 9) {
+                out.write(' ');
             }
             out.write(String.valueOf(y + 1));
             out.write("  ");

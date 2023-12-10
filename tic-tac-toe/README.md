@@ -14,11 +14,13 @@ example completed game board, where `X` has won via 3 `X`'s in a row, diagonally
 
 # Assumptions
 
-This project assumes you have a good high-level understanding of these programming concepts
-already:
+This project assumes you have a basic understanding of these programming concepts already:
 
- * **arrays** - as a contiguous, ordered list of number-addressable elements
+ * **variables**
+ * **arrays**
  * **[classes and instances](../hello-world/README.md#classes-vs-instances)**
+ * **public** vs **private** modifiers
+ * class **methods and properties**
 
 # Running the game
 
@@ -68,10 +70,10 @@ to help you get started.
 
 A player move is modeled as the `coding101.ttt.Status` Java `enum`. An `enum` is an _enumeration_
 (list) of a **fixed-set** of possible values (the list cannot be changed at runtime). As the
-`Status` enum is used to model a player move, it has `X` and `Y` values:
+`Status` enum is used to model a player move, it has `X` and `O` values:
 
 ```java
-public enum Status {
+enum Status {
     X,
     O;
 }
@@ -83,7 +85,7 @@ is a good candidate for an `enum`, something like this:
 
 ```java
 // an example of an enum modelling the state of a light switch
-public enum LightSwitchStatus {
+enum LightSwitchStatus {
     ON,
     OFF;
 }
@@ -105,9 +107,9 @@ example here is a method that returns what the "next" move should be after a giv
 "last" move:
 
 ```java
-function Status nextMove(Status lastMove) {
+Status nextMove(Status lastMove) {
     if (lastMove == Status.X) {
-        return Status.Y;
+        return Status.O;
     } else {
         return Status.X;
     }
@@ -156,7 +158,7 @@ As outlined in the [Game board](#game-board) section, the board is modeled as a 
 values, like this:
 
 ```java
-private final Status[][] board;
+Status[][] board;
 ```
 
 In Java you define an array of something by adding `[]` after the type. For additional dimensions
@@ -171,8 +173,8 @@ access. The **top-left** coordinate (0,0) is thus accessed like this:
 var status = board[0][0]; // status for top-left coordinate (0,0)
 ```
 
-Because game board is modelled with **rows** as the first dimension, that means you specify the row
-index first, then the column. This is a bit like reversing the order of a traditional (x,y) style
+Because game board is modelled with **rows** as the first dimension, that means you **specify the row
+index first, then the column**. This is a bit like reversing the order of a traditional (x,y) style
 coordinate system where `x` is the horizontal axis and `y` is the vertical axis. Thus if you imagine
 the board space represented by "(3rd across,2nd down)" you would access that like:
 
@@ -182,19 +184,18 @@ var status = board[1][2]; // status for 2nd row down, 3rd column across
 
 #### Thought exercise
 
-At the [start](#tic-tac-toe) of this README there is a picture of a finished game where player `X`
-has won. Here it is again:
+Here is a picture of a finished game where player `X` has won:
 
 ```
  O │ O │ X 
 ───┼───┼───
-   │ X │   
+   │ O │   
 ───┼───┼───
- X │ X │ O 
+ X │ X │ X 
 ```
 
 How would you access the player's 3 coordinates that earned them the win? Fill in the necessary array
-indicies in this template:
+indicies in this template (the order is **not** important):
 
 ```java
 var move1 = board[   ][   ];
@@ -211,7 +212,7 @@ on the board. This will be `3` to model a traditional tic tac toe game.
 
 ```java
 /** Our board size. */
-private final int size = 3;
+int size = 3;
 ```
 
 # Goal 1: complete game
@@ -333,3 +334,24 @@ private boolean isDraw() {
     return false;
 }
 ```
+
+# Goal 2: dynamic board size
+
+Change the `TicTacToe` `main()` method to accept a **size** argument that is an integer. This can be
+accomplished like this:
+
+```java
+public static void main(String[] args) {
+    // accept an integer size for the game board, defaulting to 3 if none provided
+    var size = (args.length > 0 ? Integer.parseInt(args[0]) : 3);
+    if (size < 2 || size > 26) {
+        System.err.println("Invalid board size, please enter a size between 2 and 26.");
+        System.exit(1);
+    }
+    var game = new TicTacToe(size);
+```
+
+## 2.1 Task
+
+Make sure the game functions correctly with the dynamic board size, that is, the `isMoveValid()`,
+`isWon()`, and `isDraw()` methods you wrote in Task 1 work for any size between 2 and 26.

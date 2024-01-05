@@ -3,4 +3,4 @@ plugins {
 }
 
 rootProject.name = 'coding101'
-include('hello-world', 'tic-tac-toe', 'utilities')
+include('hello-world', 'tic-tac-toe', 'text-quest', 'utilities')

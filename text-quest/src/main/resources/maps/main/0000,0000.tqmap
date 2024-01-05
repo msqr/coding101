@@ -1,0 +1,22 @@
+# Size: 100x100
+#
+#   A mountain        * town
+#   ~ water           O cave
+#   . grass
+#   ^ forest
+#   = lava
+#
+#        1         2         3         4         5         6         7         8         9         C
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAA~~~~.....^^^^^AAAAAAAAAOAAAA~~~~~~~~~~^^^AAAAAAA
+AA~~~~~~~.......^^^AAAAAA~~~~~~~~AAAAAAAAAAA~~
+A~~~~~~~~~~......^^AAAAA~~~~AAA~~~AAAAAAAAAAA
+A~~~~~~~*........^^^AA^~~~AAAAAAA~~~~~AAAAA
+AA~~~~~~~~~~....^^^^^^^~~~AAAAAAAAAAA~~AAAA
+AAA~~~~~~~......^^^^^^~~~AAAAAAAAAAAAA~~AAA
+AA~~~~~......^^^^^^^^~~~~AAAAAAAAAAAAAA~~AA
+A~~~~~~.....^^^^^~~~~~~AAAAAAAOAAAAAAAAA~AA
+A~~~~~~~~~~~~~~~~~~~AAAAAAAAAA==AAAAAAAA~AA
+A~~~~~~~~~~~~~~~~~AAAAAAAAAAAAA==AAAAAAA~AA
+A~~~~~~~~~~~~~~~~AAAAAAAAAAAAAAA====AAAA~~A
+AA~~~~~~~~~~~~~.AAAAAAAAAAAAAAAAAA=======~A

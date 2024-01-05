@@ -1,0 +1,348 @@
+package coding101.tq.util;
+
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import coding101.tq.domain.TerrainMap;
+import coding101.tq.domain.TerrainType;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.Resource;
+import io.github.classgraph.ScanResult;
+
+/**
+ * Utility to help build up a {@link TerrainMap} from map tiles.
+ */
+public class TerrainMapBuilder {
+
+	/**
+	 * A terrain map "tile" which is a subset of the overall terrain, positioned at
+	 * x and y coordinates.
+	 */
+	public static final class Tile implements Comparable<Tile> {
+		private final int x;
+		private final int y;
+		private final TerrainType[][] terrain;
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param x       the tile horizontal coordinate
+		 * @param y       the tile vertical coordinate
+		 * @param terrain the terrain data
+		 * @throws IllegalArgumentException if any argument is {@literal null}
+		 */
+		public Tile(int x, int y, TerrainType[][] terrain) {
+			super();
+			this.x = x;
+			this.y = y;
+			this.terrain = Objects.requireNonNull(terrain);
+		}
+
+		/**
+		 * Get the X coordinate.
+		 * 
+		 * @return the x coordinate
+		 */
+		public int getX() {
+			return x;
+		}
+
+		/**
+		 * Get the Y coordinate.
+		 * 
+		 * @return the y coordinate
+		 */
+		public int getY() {
+			return y;
+		}
+
+		/**
+		 * Get the number of columns.
+		 * 
+		 * @return the number of columns.
+		 */
+		public int getWidth() {
+			return terrain[0].length;
+		}
+
+		/**
+		 * Get the number of rows.
+		 * 
+		 * @return the number of rows
+		 */
+		public int getHeight() {
+			return terrain.length;
+		}
+
+		/**
+		 * Get the terrain data.
+		 * 
+		 * @return the terrain data
+		 */
+		public TerrainType[][] getTerrain() {
+			return terrain;
+		}
+
+		@Override
+		public int compareTo(Tile o) {
+			int result = Integer.compare(y, o.y);
+			if (result != 0) {
+				return result;
+			}
+			return Integer.compare(x, o.x);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + Objects.hash(x, y);
+			return result;
+		}
+
+		/**
+		 * Compare for equality.
+		 * 
+		 * This method compares the {@code x} and {@code y} coordinates for equality.
+		 * 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			Tile other = (Tile) obj;
+			return x == other.x && y == other.y;
+		}
+
+	}
+
+	/**
+	 * The tile resource file name pattern.
+	 * 
+	 * This pattern expects the name to follow the pattern <code>X,Y.tqmap</code>,
+	 * where {@code X} and {@code Y} are integer numbers.
+	 */
+	public static final Pattern RESOURCE_NAME_REGEX = Pattern.compile(".*(\\d+),(\\d+).tqmap");
+
+	private SortedSet<Tile> tiles = new TreeSet<>();
+
+	/**
+	 * Constructor.
+	 */
+	public TerrainMapBuilder() {
+		super();
+	}
+
+	/**
+	 * Get the number of tiles that have been loaded.
+	 * 
+	 * @return the number of loaded tiles
+	 */
+	public int getSize() {
+		return tiles.size();
+	}
+
+	/**
+	 * Add a tile.
+	 * 
+	 * @param tile the tile to add
+	 * @return this instance
+	 */
+	public TerrainMapBuilder addTile(Tile tile) {
+		tiles.add(tile);
+		return this;
+	}
+
+	/**
+	 * Build a {@link TerrainMap} from the loaded tiles.
+	 * 
+	 * @return the map
+	 * @throws IllegalArgumentException if no tiles have been loaded
+	 */
+	public TerrainMap build() {
+		int rows = 0;
+		int cols = 0;
+		int tileWidth = 0;
+		int tileHeight = 0;
+
+		// calculate dimensions
+		for (Tile t : tiles) {
+			// make sure all tiles are of the same width/height
+			if (tileWidth < 1) {
+				tileWidth = t.getWidth();
+				tileHeight = t.getHeight();
+			} else if (t.getWidth() != tileWidth || t.getHeight() != tileHeight) {
+				throw new IllegalArgumentException(
+						"Inconsistent tile width: expected (%d,%d) but got (%d,%d) for tile (%d,%d)"
+								.formatted(tileWidth, tileHeight, t.getWidth(), t.getHeight(), t.x, t.y));
+			}
+			int maxRow = t.y * tileHeight + tileHeight;
+			int maxCol = t.x * tileWidth + tileWidth;
+			if (maxRow > rows) {
+				rows = maxRow;
+			}
+			if (maxCol > cols) {
+				cols = maxCol;
+			}
+		}
+
+		TerrainType[][] terrain = new TerrainType[rows][];
+		for (Tile t : tiles) {
+			for (int row = 0, len = t.getHeight(); row < len; row++) {
+				int destRow = t.y * tileHeight + row;
+				if (terrain[destRow] == null) {
+					terrain[destRow] = new TerrainType[cols];
+				}
+				System.arraycopy(t.terrain[row], 0, terrain[destRow], t.x * tileWidth, tileWidth);
+			}
+		}
+
+		return new TerrainMap(terrain);
+	}
+
+	/**
+	 * Parse all tile resources in a directory.
+	 * 
+	 * @param directoryName the directory to scan and parse all tile resources from
+	 * @return the builder
+	 * @throws IllegalArgumentException if the resource cannot be parsed
+	 */
+	public static TerrainMapBuilder parseResources(String directoryName) {
+		TerrainMapBuilder b = new TerrainMapBuilder();
+		try (ScanResult scanResult = new ClassGraph().acceptPaths(directoryName).scan()) {
+			scanResult.getResourcesMatchingPattern(RESOURCE_NAME_REGEX).forEach((Resource res) -> {
+				try (InputStream in = res.open()) {
+					b.addTile(parseTileResource(res.getPath(), in));
+				} catch (IOException e) {
+					throw new IllegalArgumentException(
+							"Error parsing resource [%s]: %s".formatted(res.getPath(), e.getMessage()), e);
+				}
+			});
+		}
+		if (b.getSize() < 1) {
+			// try loading file paths
+			try (DirectoryStream<Path> s = Files.newDirectoryStream(Path.of(directoryName), (Path p) -> {
+				Matcher m = RESOURCE_NAME_REGEX.matcher(p.getFileName().toString());
+				return m.find();
+			})) {
+				s.forEach(p -> {
+					try (InputStream in = Files.newInputStream(p)) {
+						b.addTile(parseTileResource(p.toString(), in));
+					} catch (IOException e) {
+						throw new IllegalArgumentException(
+								"Error parsing resource [%s]: %s".formatted(p, e.getMessage()), e);
+					}
+				});
+			} catch (IOException e) {
+				throw new IllegalArgumentException(
+						"Error loading tile files from directory [%s]: %s".formatted(directoryName, e.getMessage()), e);
+			}
+		}
+		return b;
+	}
+
+	/**
+	 * Parse {@code US_ASCII} encoded {@link TerrainType} resource.
+	 * 
+	 * @param resource the resource to parse; must have a file name that matches
+	 *                 {@link #RESOURCE_NAME_REGEX}
+	 * @return the parsed tile
+	 * @throws IllegalArgumentException if the resource cannot be parsed
+	 */
+	public static Tile parseTileResource(String resource) {
+		// first try classpath resource
+		try {
+			try (InputStream in = TerrainMapBuilder.class.getClassLoader().getResourceAsStream(resource)) {
+				return parseTileResource(resource, in);
+			} catch (NullPointerException e) {
+				// resource not found; try as file path
+				try (InputStream in2 = Files.newInputStream(Paths.get(resource))) {
+					return parseTileResource(resource, in2);
+				}
+			}
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+					"Error reading resource [%s]: %s".formatted(resource, e.getMessage(), e));
+		}
+	}
+
+	/**
+	 * Parse {@code US_ASCII} encoded {@link TerrainType} resource.
+	 * 
+	 * @param resource the resource name
+	 * @param in       the data input stream
+	 * @return the parsed tile
+	 * @throws IllegalArgumentException if the resource cannot be parsed
+	 */
+	public static Tile parseTileResource(String resource, InputStream in) {
+		Path path = Path.of(resource);
+		String fileName = path.getFileName().toString();
+		Matcher matcher = RESOURCE_NAME_REGEX.matcher(fileName);
+		if (!matcher.find()) {
+			throw new IllegalArgumentException("Resource must match 'X,Y.tqmap' pattern.");
+		}
+
+		TerrainType[][] data = null;
+
+		// first try classpath resource
+		try (BufferedReader r = new BufferedReader(new InputStreamReader(in, US_ASCII))) {
+			data = parseTerrainData(r);
+		} catch (IOException e) {
+			throw new IllegalArgumentException(
+					"Error reading resource [%s]: %s".formatted(resource, e.getMessage(), e));
+		}
+
+		return new Tile(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)), data);
+	}
+
+	/**
+	 * Parse {@code US_ASCII} encoded terrain data.
+	 * 
+	 * Blank lines or those staring with {@literal #} are ignored.
+	 * 
+	 * @param r the resource to parse
+	 * @return the terrain data
+	 * @throws IOException if any I/O error occurs
+	 */
+	public static TerrainType[][] parseTerrainData(BufferedReader r) throws IOException {
+		List<TerrainType[]> rows = new ArrayList<>(64);
+		String line = null;
+		while ((line = r.readLine()) != null) {
+			if (line.isBlank() || line.charAt(0) == '#') {
+				// skip comment line
+				continue;
+			}
+			// since we assume the data is US_ASCII, the string length is our row length
+			TerrainType[] row = new TerrainType[line.length()];
+			for (int i = 0, len = row.length; i < len; i++) {
+				row[i] = TerrainType.forKey(line.charAt(i));
+			}
+			rows.add(row);
+		}
+		return rows.toArray(TerrainType[][]::new);
+	}
+
+}

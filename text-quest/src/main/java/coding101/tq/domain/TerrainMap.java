@@ -4,29 +4,42 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A map of terrain, as a 2D array of rows.
  */
 public class TerrainMap {
 
+    /** A coordinate pattern like {@code 1,2}. */
+    public static final Pattern COORDINATE_REGEX = Pattern.compile("(\\d+)\\s*,\\s*(\\d+)");
+
+    /** Metadata key for a starting coordinate in the form X,Y. */
+    public static final String START_META = "start";
+
     private final String name;
     private final TerrainType[][] terrain;
+    private final Map<String, String> metadata;
     private final int width;
     private final int height;
 
     /**
      * Constructor.
      *
-     * @param name    the map name
-     * @param terrain the terrain
+     * @param name     the map name
+     * @param terrain  the terrain
+     * @param metadata the metadata
      * @throws IllegalArgumentException if any argument is {@litearl null}
      */
-    public TerrainMap(String name, TerrainType[][] terrain) {
+    public TerrainMap(String name, TerrainType[][] terrain, Map<String, String> metadata) {
         super();
         this.name = Objects.requireNonNull(name);
         this.terrain = Objects.requireNonNull(terrain);
+        this.metadata = Collections.unmodifiableMap(Objects.requireNonNull(metadata));
         if (terrain.length < 1 || terrain[0] == null || terrain[0].length < 1) {
             throw new IllegalArgumentException("Invalid terrain array: must have at least 1 non-empty element.");
         }
@@ -71,6 +84,35 @@ public class TerrainMap {
      */
     public final int height() {
         return height;
+    }
+
+    /**
+     * Get the metadata.
+     *
+     * @return the metadata
+     */
+    public Map<String, String> metadata() {
+        return metadata;
+    }
+
+    /**
+     * Get the starting coordinate for the map.
+     *
+     * This will look for the {@code start} metadata value, which is expected to be
+     * a 0-based coordinate in the form {@code X,Y}. If not available, then a
+     * default coordinate of {@code 9,9} will be returned.
+     *
+     * @return the starting coordinate
+     */
+    public Coordinate startingCoordinate() {
+        String start = metadata.get(START_META);
+        if (start != null) {
+            Matcher m = COORDINATE_REGEX.matcher(start);
+            if (m.find()) {
+                return new Coordinate(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
+            }
+        }
+        return new Coordinate(9, 9);
     }
 
     /**

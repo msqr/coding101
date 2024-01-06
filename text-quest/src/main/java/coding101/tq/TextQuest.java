@@ -339,7 +339,7 @@ public class TextQuest {
             // create player
             // TODO: load saved player
             Player player = new Player();
-            player.moveTo(mainMap, 9, 9); // TODO: initial coordinate from somewhere
+            player.moveTo(mainMap, mainMap.startingCoordinate());
 
             // create text screen on top of our terminal
             Screen screen = new TerminalScreen(terminal);

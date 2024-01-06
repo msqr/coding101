@@ -16,7 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -36,6 +39,7 @@ public class TerrainMapBuilder {
         private final int x;
         private final int y;
         private final TerrainType[][] terrain;
+        private final Map<String, String> metadata;
 
         /**
          * Constructor.
@@ -45,11 +49,12 @@ public class TerrainMapBuilder {
          * @param terrain the terrain data
          * @throws IllegalArgumentException if any argument is {@literal null}
          */
-        public Tile(int x, int y, TerrainType[][] terrain) {
+        public Tile(int x, int y, TerrainType[][] terrain, Map<String, String> metadata) {
             super();
             this.x = x;
             this.y = y;
             this.terrain = Objects.requireNonNull(terrain);
+            this.metadata = Objects.requireNonNull(metadata);
         }
 
         /**
@@ -95,6 +100,15 @@ public class TerrainMapBuilder {
          */
         public TerrainType[][] getTerrain() {
             return terrain;
+        }
+
+        /**
+         * Get the metadata.
+         *
+         * @return the metadata
+         */
+        public Map<String, String> getMetadata() {
+            return metadata;
         }
 
         @Override
@@ -210,7 +224,9 @@ public class TerrainMapBuilder {
         }
 
         TerrainType[][] terrain = new TerrainType[rows][];
+        Map<String, String> metadata = new LinkedHashMap<>(4);
         for (Tile t : tiles) {
+            metadata.putAll(t.getMetadata());
             for (int row = 0, len = t.getHeight(); row < len; row++) {
                 int destRow = t.y * tileHeight + row;
                 if (terrain[destRow] == null) {
@@ -225,7 +241,7 @@ public class TerrainMapBuilder {
             }
         }
 
-        return new TerrainMap(name, terrain);
+        return new TerrainMap(name, terrain, metadata);
     }
 
     /**
@@ -311,33 +327,52 @@ public class TerrainMapBuilder {
         }
 
         TerrainType[][] data = null;
+        Map<String, String> metadata = new LinkedHashMap<>(4);
 
         // first try classpath resource
         try (BufferedReader r = new BufferedReader(new InputStreamReader(in, US_ASCII))) {
-            data = parseTerrainData(r);
+            data = parseTerrainData(r, metadata);
         } catch (IOException e) {
             throw new IllegalArgumentException(
                     "Error reading resource [%s]: %s".formatted(resource, e.getMessage(), e));
         }
 
-        return new Tile(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)), data);
+        return new Tile(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)), data, metadata);
     }
+
+    /**
+     * A comment metadata line with a key/value pair in the form {@code key: value}.
+     */
+    public static final Pattern METADATA_REGEX =
+            Pattern.compile("#-\\s*([a-zA-Z0-9_-]+)\s*:\s*(.*)", Pattern.CASE_INSENSITIVE);
 
     /**
      * Parse {@code US_ASCII} encoded terrain data.
      *
      * Blank lines or those staring with {@literal #} are ignored.
      *
-     * @param r the resource to parse
+     * @param r        the resource to parse
+     * @param metadata the metadata map to populate with any extracted metadata
      * @return the terrain data
      * @throws IOException if any I/O error occurs
      */
-    public static TerrainType[][] parseTerrainData(BufferedReader r) throws IOException {
+    public static TerrainType[][] parseTerrainData(BufferedReader r, Map<String, String> metadata) throws IOException {
         List<TerrainType[]> rows = new ArrayList<>(64);
         String line = null;
         while ((line = r.readLine()) != null) {
-            if (line.isBlank() || line.charAt(0) == '#') {
-                // skip comment line
+            if (line.isBlank()) {
+                // skip blank line
+                continue;
+            } else if (line.charAt(0) == '#') {
+                if (line.length() > 1 && line.charAt(1) == '-') {
+                    // metadata line
+                    Matcher m = METADATA_REGEX.matcher(line);
+                    if (m.matches()) {
+                        String key = m.group(1).toLowerCase();
+                        String val = m.group(2).trim();
+                        metadata.put(key, val);
+                    }
+                }
                 continue;
             }
             // since we assume the data is US_ASCII, the string length is our row length
@@ -364,6 +399,6 @@ public class TerrainMapBuilder {
         for (int row = 0; row < height; row++) {
             data[row] = new TerrainType[width];
         }
-        return new TerrainMap(name, data);
+        return new TerrainMap(name, data, Collections.emptyMap());
     }
 }

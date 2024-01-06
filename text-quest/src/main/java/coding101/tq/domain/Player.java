@@ -49,15 +49,27 @@ public class Player {
     /**
      * Update the player coordinate.
      *
+     * @param map   the map to move to
+     * @param coord the coordinate
+     * @return {@code true} if visiting the coordinate for the first time
+     */
+    public boolean moveTo(TerrainMap map, Coordinate coord) {
+        return moveTo(map, coord.x(), coord.y());
+    }
+
+    /**
+     * Update the player coordinate.
+     *
      * @param map the map to move to
      * @param x   the X coordinate
      * @param y   the Y coordinate
+     * @return {@code true} if visiting the coordinate for the first time
      */
-    public void moveTo(TerrainMap map, int x, int y) {
+    public boolean moveTo(TerrainMap map, int x, int y) {
         setX(x);
         setY(y);
         setActiveMapName(map.getName());
-        visited(map, x, y);
+        return visited(map, x, y);
     }
 
     /**

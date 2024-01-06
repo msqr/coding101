@@ -68,7 +68,7 @@ public class TextQuest {
     public void run() throws IOException {
         setupScreen();
         while (true) {
-            KeyStroke keyStroke = screen.pollInput();
+            KeyStroke keyStroke = screen.readInput();
             KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
             if (keyType == KeyType.Escape || keyType == KeyType.EOF) {
                 return;
@@ -203,9 +203,10 @@ public class TextQuest {
 
         // right info pane
         graphics.setCharacter(infoPaneLeft() - 1, 0, Symbols.DOUBLE_LINE_T_DOWN);
-        graphics.setCharacter(infoPaneLeft() - 1, screenSize.getRows() - 3, Symbols.DOUBLE_LINE_T_UP);
         graphics.drawLine(
-                infoPaneLeft() - 1, 1, infoPaneLeft() - 1, screenSize.getRows() - 4, Symbols.DOUBLE_LINE_VERTICAL);
+                infoPaneLeft() - 1, 1, infoPaneLeft() - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_VERTICAL);
+        graphics.setCharacter(infoPaneLeft() - 1, screenSize.getRows() - 3, Symbols.DOUBLE_LINE_CROSS);
+        graphics.setCharacter(infoPaneLeft() - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_T_UP);
 
         // info title
         graphics.setCharacter(infoPaneLeft() - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_RIGHT);
@@ -220,33 +221,35 @@ public class TextQuest {
     }
 
     /** The amount of health each display heart represents. */
-    public static final int PLAYER_HEALTH_HEART_VALUE = 10;
+    public static final int PLAYER_HEALTH_HEART_VALUE = 5;
 
     private void drawHealth() {
         int health = player.getHealth();
         int partial = health % PLAYER_HEALTH_HEART_VALUE;
         int full = (health - partial) / PLAYER_HEALTH_HEART_VALUE;
+        int y = statusPaneTop();
+        int startX = infoPaneLeft();
 
         graphics.setForegroundColor(color(settings.colors().foreground().health(), ANSI.RED));
         graphics.setBackgroundColor(color(settings.colors().background().health(), ANSI.BLACK));
 
         // draw all full hearts
-        for (int row = statusPaneLeft(), max = statusPaneLeft() + full; row < max; row++) {
-            graphics.setCharacter(row, statusPaneTop(), Symbols.HEART);
+        for (int row = startX, max = startX + full; row < max; row++) {
+            graphics.setCharacter(row, y, Symbols.HEART);
         }
 
         // if a partial heart, draw using a different color
         if (partial > 0) {
             graphics.setForegroundColor(color(settings.colors().foreground().healthPartial(), ANSI.RED_BRIGHT));
-            graphics.setCharacter(statusPaneLeft() + full, statusPaneTop(), Symbols.HEART);
+            graphics.setCharacter(startX + full, y, Symbols.HEART);
         }
 
         // draw blanks to "erase" any lost hearts
-        for (int row = statusPaneLeft() + full + (partial > 0 ? 1 : 0),
-                        max = statusPaneLeft() + Player.MAX_HEALTH / PLAYER_HEALTH_HEART_VALUE;
+        for (int row = startX + full + (partial > 0 ? 1 : 0),
+                        max = startX + Player.MAX_HEALTH / PLAYER_HEALTH_HEART_VALUE;
                 row < max;
                 row++) {
-            graphics.setCharacter(row, statusPaneTop(), ' ');
+            graphics.setCharacter(row, y, ' ');
         }
     }
 

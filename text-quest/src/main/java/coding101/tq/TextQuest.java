@@ -5,6 +5,9 @@ import static coding101.tq.domain.ColorScheme.color;
 import coding101.tq.domain.ColorScheme;
 import coding101.tq.domain.Player;
 import coding101.tq.domain.Settings;
+import coding101.tq.domain.TerrainMap;
+import coding101.tq.domain.TerrainType;
+import coding101.tq.util.TerrainMapBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,25 +34,28 @@ public class TextQuest {
 
     private final Screen screen;
     private final Settings settings;
+    private final TerrainMap mainMap;
     private final Player player;
     private final ObjectMapper mapper;
     private final TextGraphics graphics;
-    private final TerminalSize screenSize;
     private final ResourceBundle bundle;
+    private TerminalSize screenSize;
 
     /**
      * Constructor.
      *
      * @param screen   the screen to render to
      * @param settings the game settings
+     * @param mainMap  the main map
      * @param player   the player
      * @param mapper   the JSON mapper
      * @throws IllegalArgumentException if any argument is {@literal null}
      */
-    public TextQuest(Screen screen, Settings settings, Player player, ObjectMapper mapper) {
+    public TextQuest(Screen screen, Settings settings, TerrainMap mainMap, Player player, ObjectMapper mapper) {
         super();
         this.screen = Objects.requireNonNull(screen);
         this.settings = Objects.requireNonNull(settings);
+        this.mainMap = Objects.requireNonNull(mainMap);
         this.player = Objects.requireNonNull(player);
         this.mapper = Objects.requireNonNull(mapper);
         this.graphics = screen.newTextGraphics();
@@ -58,6 +64,25 @@ public class TextQuest {
     }
 
     public void start() throws IOException {
+        setupScreen();
+        while (true) {
+            KeyStroke keyStroke = screen.pollInput();
+            KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
+            if (keyType == KeyType.Escape || keyType == KeyType.EOF) {
+                return;
+            }
+
+            TerminalSize newSize = screen.doResizeIfNecessary();
+            if (newSize != null) {
+                screenSize = newSize;
+                setupScreen();
+            }
+
+            Thread.yield();
+        }
+    }
+
+    public void setupScreen() throws IOException {
         // clear screen
         graphics.setForegroundColor(color(settings.colors().uiBorder(), ANSI.WHITE));
         graphics.setBackgroundColor(color(settings.colors().uiBorderBg(), ANSI.BLACK));
@@ -65,15 +90,11 @@ public class TextQuest {
 
         drawChrome();
         drawHealth();
+
+        // TODO: use player's current position
+        drawMapForPoint(mainMap, 0, 0);
+
         screen.refresh();
-        while (true) {
-            KeyStroke keyStroke = screen.readInput();
-            KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
-            if (keyType == KeyType.Escape || keyType == KeyType.EOF) {
-                return;
-            }
-            Thread.yield();
-        }
     }
 
     private final int infoPaneLeft() {
@@ -90,6 +111,30 @@ public class TextQuest {
 
     private final int statusPaneTop() {
         return screenSize.getRows() - 2;
+    }
+
+    private final int mapPaneTop() {
+        return 1;
+    }
+
+    private final int mapPaneLeft() {
+        return 1;
+    }
+
+    private final int mapPaneRight() {
+        return infoPaneLeft() - 2;
+    }
+
+    private final int mapPaneBottom() {
+        return statusPaneTop() - 1;
+    }
+
+    private final int mapPaneWidth() {
+        return mapPaneRight() - mapPaneLeft();
+    }
+
+    private final int mapPaneHeight() {
+        return mapPaneBottom() - mapPaneTop();
     }
 
     private void drawChrome() throws IOException {
@@ -184,6 +229,23 @@ public class TextQuest {
         }
     }
 
+    private void drawMapForPoint(TerrainMap map, int x, int y) {
+        final int paneWidth = mapPaneWidth();
+        final int paneHeight = mapPaneHeight();
+        final int paneTop = mapPaneTop();
+        final int paneLeft = mapPaneLeft();
+
+        final int startX = x / paneWidth;
+        final int startY = y / paneHeight;
+        map.walk(startX, startY, paneWidth, paneHeight, (col, row, t) -> {
+
+            // TODO: use colors for terrain type from scheme
+            graphics.setForegroundColor(color(settings.colors().uiText(), ANSI.WHITE_BRIGHT));
+            graphics.setBackgroundColor(color(settings.colors().uiTextBg(), ANSI.BLACK));
+            graphics.setCharacter(col + paneLeft, row + paneTop, t != null ? t.getKey() : TerrainType.EMPTY);
+        });
+    }
+
     public static void main(String[] args) {
         try (Terminal terminal = new DefaultTerminalFactory().createTerminal()) {
             TerminalSize screenSize = terminal.getTerminalSize();
@@ -205,6 +267,11 @@ public class TextQuest {
                             .getResourceAsStream("META-INF/colors/%s.json".formatted(colorScheme)),
                     ColorScheme.class);
 
+            // load map
+            String mapName = "main"; // TODO support command-line switch
+            TerrainMap mainMap = TerrainMapBuilder.parseResources("META-INF/tqmaps/%s".formatted(mapName))
+                    .build();
+
             // create game settings
             Settings settings = new Settings(colors);
 
@@ -217,7 +284,7 @@ public class TextQuest {
             try {
                 screen.startScreen();
                 screen.setCursorPosition(null);
-                TextQuest tq = new TextQuest(screen, settings, player, mapper);
+                TextQuest tq = new TextQuest(screen, settings, mainMap, player, mapper);
                 tq.start();
             } finally {
                 screen.stopScreen();

@@ -17,7 +17,7 @@ public class TerrainMapTests {
 
     @BeforeAll
     public static void setupClass() {
-        map01 = TerrainMapBuilder.parseResources("coding101/tq/util/test/map01").build();
+        map01 = TerrainMapBuilder.parseResources("coding101/tq/util/test/map01").build("");
     }
 
     @Test

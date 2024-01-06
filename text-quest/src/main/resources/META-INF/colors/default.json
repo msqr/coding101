@@ -4,6 +4,7 @@
 		"uiBorder":      "Black",
 		"health":        "Black",
 		"healthPartial": "Black",
+		"player":        "White",
 		"cave":          "#555555",
 		"forest":        "#04AA00",
 		"grass":         "#55FF55",
@@ -13,10 +14,11 @@
 		"water":         "#0000AA"
 	},
 	"foreground": {
-		"uiText":        "White_Bright",
-		"uiBorder":      "White",
-		"health":        "Red",
-		"healthPartial": "Red_Bright",
+		"uiText":        "White",
+		"uiBorder":      "Gray",
+		"health":        "DarkRed",
+		"healthPartial": "LightRed",
+		"player":        "LightMagenta",
 		"cave":          "#FFFFFF",
 		"forest":        "#AA5500",
 		"grass":         "#04AA00",

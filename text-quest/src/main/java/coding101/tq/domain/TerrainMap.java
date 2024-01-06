@@ -11,6 +11,7 @@ import java.util.Objects;
  */
 public class TerrainMap {
 
+    private final String name;
     private final TerrainType[][] terrain;
     private final int width;
     private final int height;
@@ -18,17 +19,28 @@ public class TerrainMap {
     /**
      * Constructor.
      *
+     * @param name    the map name
      * @param terrain the terrain
      * @throws IllegalArgumentException if any argument is {@litearl null}
      */
-    public TerrainMap(TerrainType[][] terrain) {
+    public TerrainMap(String name, TerrainType[][] terrain) {
         super();
+        this.name = Objects.requireNonNull(name);
         this.terrain = Objects.requireNonNull(terrain);
         if (terrain.length < 1 || terrain[0] == null || terrain[0].length < 1) {
             throw new IllegalArgumentException("Invalid terrain array: must have at least 1 non-empty element.");
         }
         this.width = terrain[0].length;
         this.height = terrain.length;
+    }
+
+    /**
+     * Get the map name.
+     *
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -62,6 +74,25 @@ public class TerrainMap {
             return TerrainType.Empty;
         }
         return terrain[y][x];
+    }
+
+    /**
+     * Modify the terrain type at a specific coordinate.
+     *
+     * @param x    the x coordinate
+     * @param y    the y coordinate
+     * @param type the type to set
+     * @returns {@code true} if the terrain was changed
+     */
+    public final boolean modifyAt(int x, int y, TerrainType type) {
+        if (x >= width || y >= height) {
+            return false;
+        }
+        if (terrain[y][x] != type) {
+            terrain[y][x] = type;
+            return true;
+        }
+        return false;
     }
 
     @Override

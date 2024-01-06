@@ -14,6 +14,7 @@ public record ColorPalette(
         String uiBorder,
         String health,
         String healthPartial,
+        String player,
         String cave,
         String forest,
         String grass,

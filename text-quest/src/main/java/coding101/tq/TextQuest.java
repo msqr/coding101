@@ -91,8 +91,9 @@ public class TextQuest {
         drawChrome();
         drawHealth();
 
-        // TODO: use player's current position
-        drawMapForPoint(mainMap, 0, 0);
+        drawMapForPoint(mainMap, player.getX(), player.getY());
+
+        drawPlayer();
 
         screen.refresh();
     }
@@ -234,16 +235,25 @@ public class TextQuest {
         final int paneHeight = mapPaneHeight();
         final int paneTop = mapPaneTop();
         final int paneLeft = mapPaneLeft();
-
         final int startX = x / paneWidth;
         final int startY = y / paneHeight;
         map.walk(startX, startY, paneWidth, paneHeight, (col, row, t) -> {
-
-            // TODO: use colors for terrain type from scheme
             graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
             graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
             graphics.setCharacter(col + paneLeft, row + paneTop, t != null ? t.getKey() : TerrainType.EMPTY);
         });
+    }
+
+    private void drawPlayer() {
+        final int paneWidth = mapPaneWidth();
+        final int paneHeight = mapPaneHeight();
+        final int paneTop = mapPaneTop();
+        final int paneLeft = mapPaneLeft();
+        final int startX = player.getX() / paneWidth;
+        final int startY = player.getY() / paneHeight;
+        graphics.setForegroundColor(color(settings.colors().foreground().player(), ANSI.WHITE_BRIGHT));
+        graphics.setBackgroundColor(color(settings.colors().background().player(), ANSI.MAGENTA_BRIGHT));
+        graphics.setCharacter(player.getX() - startX + paneLeft, player.getY() - startY + paneTop, '@');
     }
 
     public static void main(String[] args) {
@@ -270,7 +280,7 @@ public class TextQuest {
             // load map
             String mapName = "main"; // TODO support command-line switch
             TerrainMap mainMap = TerrainMapBuilder.parseResources("META-INF/tqmaps/%s".formatted(mapName))
-                    .build();
+                    .build(mapName);
 
             // create game settings
             Settings settings = new Settings(colors);
@@ -278,6 +288,7 @@ public class TextQuest {
             // create player
             // TODO: load saved player
             Player player = new Player();
+            player.moveTo(mainMap, 9, 9); // TODO: initial coordinate from somewhere
 
             // create text screen on top of our terminal
             Screen screen = new TerminalScreen(terminal);

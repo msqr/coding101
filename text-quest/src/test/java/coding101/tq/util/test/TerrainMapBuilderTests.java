@@ -15,7 +15,7 @@ public class TerrainMapBuilderTests {
     public void parseClassPathResources() {
         // WHEN
         TerrainMap tm =
-                TerrainMapBuilder.parseResources("coding101/tq/util/test/map01").build();
+                TerrainMapBuilder.parseResources("coding101/tq/util/test/map01").build("");
         String result = tm.render();
 
         // THEN
@@ -41,7 +41,7 @@ public class TerrainMapBuilderTests {
     public void parseClassPathResources_withQuadrantHole() {
         // WHEN
         TerrainMap tm =
-                TerrainMapBuilder.parseResources("coding101/tq/util/test/map02").build();
+                TerrainMapBuilder.parseResources("coding101/tq/util/test/map02").build("");
         String result = tm.render();
 
         // THEN

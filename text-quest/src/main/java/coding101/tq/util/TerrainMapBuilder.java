@@ -214,7 +214,12 @@ public class TerrainMapBuilder {
                 if (terrain[destRow] == null) {
                     terrain[destRow] = new TerrainType[cols];
                 }
-                System.arraycopy(t.terrain[row], 0, terrain[destRow], t.x * tileWidth, tileWidth);
+                System.arraycopy(
+                        t.terrain[row],
+                        0,
+                        terrain[destRow],
+                        t.x * tileWidth,
+                        Math.min(t.terrain[row].length, tileWidth));
             }
         }
 

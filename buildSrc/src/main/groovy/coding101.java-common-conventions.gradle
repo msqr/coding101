@@ -21,6 +21,20 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+[
+	compileJava,
+	compileTestJava
+].each() {
+	it.options.compilerArgs += [
+		"-Xlint:all",
+		"-Xlint:-options",
+		"-Xlint:-path",
+		"-Xlint:-try",
+		"-parameters"
+	]
+	it.options.encoding = "UTF-8"
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)

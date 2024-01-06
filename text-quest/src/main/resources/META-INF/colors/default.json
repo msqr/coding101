@@ -1,0 +1,9 @@
+{
+	"uiText":        "White_Bright",
+	"uiTextBg":      "Black",
+	"uiBorder":      "White",
+	"uiBorderBg":    "Black",
+	"health":        "Red",
+	"healthBg":      "Black",
+	"healthPartial": "Red_Bright"
+}

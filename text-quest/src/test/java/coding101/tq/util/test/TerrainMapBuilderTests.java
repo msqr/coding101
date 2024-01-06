@@ -2,24 +2,25 @@ package coding101.tq.util.test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-import org.junit.jupiter.api.Test;
-
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.util.TerrainMapBuilder;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test cases for the {@link TerrainMapBuilder} class.
  */
 public class TerrainMapBuilderTests {
 
-	@Test
-	public void parseClassPathResources() {
-		// WHEN
-		TerrainMap tm = TerrainMapBuilder.parseResources("coding101/tq/util/test/map01").build();
-		String result = tm.render();
+    @Test
+    public void parseClassPathResources() {
+        // WHEN
+        TerrainMap tm =
+                TerrainMapBuilder.parseResources("coding101/tq/util/test/map01").build();
+        String result = tm.render();
 
-		// THEN
-		String expectedMap = """
+        // THEN
+        String expectedMap =
+                """
 				AAAAA~~~~~
 				~~~~.=====
 				^^^AA^^^^^
@@ -30,19 +31,22 @@ public class TerrainMapBuilderTests {
 				^^*AA    A
 				~~~~~=====
 				=====AAAAA
-				""".trim();
+				"""
+                        .trim();
 
-		then(result).as("Parsed quadrant tiles into complete map").isEqualTo(expectedMap);
-	}
+        then(result).as("Parsed quadrant tiles into complete map").isEqualTo(expectedMap);
+    }
 
-	@Test
-	public void parseClassPathResources_withQuadrantHole() {
-		// WHEN
-		TerrainMap tm = TerrainMapBuilder.parseResources("coding101/tq/util/test/map02").build();
-		String result = tm.render();
+    @Test
+    public void parseClassPathResources_withQuadrantHole() {
+        // WHEN
+        TerrainMap tm =
+                TerrainMapBuilder.parseResources("coding101/tq/util/test/map02").build();
+        String result = tm.render();
 
-		// THEN
-		String expectedMap = """
+        // THEN
+        String expectedMap =
+                """
 				AAAAA~~~~~
 				~~~~.=====
 				^^^AA^^^^^
@@ -53,9 +57,11 @@ public class TerrainMapBuilderTests {
 				         A
 				     =====
 				     AAAAA
-				""".trim();
+				"""
+                        .trim();
 
-		then(result).as("Parsed quadrant tiles with missing tiles into complete map").isEqualTo(expectedMap);
-	}
-
+        then(result)
+                .as("Parsed quadrant tiles with missing tiles into complete map")
+                .isEqualTo(expectedMap);
+    }
 }

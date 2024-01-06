@@ -1,6 +1,6 @@
 package coding101.tq;
 
-import static coding101.tq.domain.ColorScheme.color;
+import static coding101.tq.domain.ColorPalette.color;
 
 import coding101.tq.domain.ColorScheme;
 import coding101.tq.domain.Player;
@@ -84,8 +84,8 @@ public class TextQuest {
 
     public void setupScreen() throws IOException {
         // clear screen
-        graphics.setForegroundColor(color(settings.colors().uiBorder(), ANSI.WHITE));
-        graphics.setBackgroundColor(color(settings.colors().uiBorderBg(), ANSI.BLACK));
+        graphics.setForegroundColor(color(settings.colors().foreground().uiBorder(), ANSI.WHITE));
+        graphics.setBackgroundColor(color(settings.colors().background().uiBorder(), ANSI.BLACK));
         graphics.fill(' ');
 
         drawChrome();
@@ -98,7 +98,7 @@ public class TextQuest {
     }
 
     private final int infoPaneLeft() {
-        return screenSize.getColumns() - INFO_PANE_WIDTH - 2;
+        return screenSize.getColumns() - INFO_PANE_WIDTH - 1;
     }
 
     private final int infoPaneTop() {
@@ -126,20 +126,20 @@ public class TextQuest {
     }
 
     private final int mapPaneBottom() {
-        return statusPaneTop() - 1;
+        return statusPaneTop() - 2;
     }
 
     private final int mapPaneWidth() {
-        return mapPaneRight() - mapPaneLeft();
+        return mapPaneRight() - mapPaneLeft() + 1;
     }
 
     private final int mapPaneHeight() {
-        return mapPaneBottom() - mapPaneTop();
+        return mapPaneBottom() - mapPaneTop() + 1;
     }
 
     private void drawChrome() throws IOException {
-        graphics.setForegroundColor(color(settings.colors().uiBorder(), ANSI.WHITE));
-        graphics.setBackgroundColor(color(settings.colors().uiBorderBg(), ANSI.BLACK));
+        graphics.setForegroundColor(color(settings.colors().foreground().uiBorder(), ANSI.WHITE));
+        graphics.setBackgroundColor(color(settings.colors().background().uiBorder(), ANSI.BLACK));
 
         // top
         graphics.drawLine(1, 0, screenSize.getColumns() - 2, 0, Symbols.DOUBLE_LINE_HORIZONTAL);
@@ -191,8 +191,8 @@ public class TextQuest {
         graphics.setCharacter(screenSize.getColumns() - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_LEFT);
         graphics.drawLine(infoPaneLeft(), 2, screenSize.getColumns() - 2, 2, Symbols.SINGLE_LINE_HORIZONTAL);
 
-        graphics.setForegroundColor(color(settings.colors().uiText(), ANSI.WHITE_BRIGHT));
-        graphics.setBackgroundColor(color(settings.colors().uiTextBg(), ANSI.BLACK));
+        graphics.setForegroundColor(color(settings.colors().foreground().uiText(), ANSI.WHITE_BRIGHT));
+        graphics.setBackgroundColor(color(settings.colors().background().uiText(), ANSI.BLACK));
 
         String inventory = bundle.getString("inventory");
         graphics.putString(infoPaneLeft() + (INFO_PANE_WIDTH - inventory.length()) / 2, 1, inventory);
@@ -206,8 +206,8 @@ public class TextQuest {
         int partial = health % PLAYER_HEALTH_HEART_VALUE;
         int full = (health - partial) / PLAYER_HEALTH_HEART_VALUE;
 
-        graphics.setForegroundColor(color(settings.colors().health(), ANSI.RED));
-        graphics.setBackgroundColor(color(settings.colors().healthBg(), ANSI.BLACK));
+        graphics.setForegroundColor(color(settings.colors().foreground().health(), ANSI.RED));
+        graphics.setBackgroundColor(color(settings.colors().background().health(), ANSI.BLACK));
 
         // draw all full hearts
         for (int row = statusPaneLeft(), max = statusPaneLeft() + full; row < max; row++) {
@@ -216,7 +216,7 @@ public class TextQuest {
 
         // if a partial heart, draw using a different color
         if (partial > 0) {
-            graphics.setForegroundColor(color(settings.colors().healthPartial(), ANSI.RED_BRIGHT));
+            graphics.setForegroundColor(color(settings.colors().foreground().healthPartial(), ANSI.RED_BRIGHT));
             graphics.setCharacter(statusPaneLeft() + full, statusPaneTop(), Symbols.HEART);
         }
 
@@ -240,8 +240,8 @@ public class TextQuest {
         map.walk(startX, startY, paneWidth, paneHeight, (col, row, t) -> {
 
             // TODO: use colors for terrain type from scheme
-            graphics.setForegroundColor(color(settings.colors().uiText(), ANSI.WHITE_BRIGHT));
-            graphics.setBackgroundColor(color(settings.colors().uiTextBg(), ANSI.BLACK));
+            graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
+            graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
             graphics.setCharacter(col + paneLeft, row + paneTop, t != null ? t.getKey() : TerrainType.EMPTY);
         });
     }
@@ -249,7 +249,7 @@ public class TextQuest {
     public static void main(String[] args) {
         try (Terminal terminal = new DefaultTerminalFactory().createTerminal()) {
             TerminalSize screenSize = terminal.getTerminalSize();
-            if (screenSize.getColumns() < 80 || screenSize.getRows() < 24) {
+            if (screenSize.getColumns() < 30 || screenSize.getRows() < 18) {
                 System.err.println("Terminal must be at least 80x24.");
                 System.exit(1);
             }

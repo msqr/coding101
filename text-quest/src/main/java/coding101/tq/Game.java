@@ -5,11 +5,19 @@ import coding101.tq.domain.Settings;
 import coding101.tq.domain.TerrainMap;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
+import java.util.ResourceBundle;
 
 /**
  * API for the game overall.
  */
 public interface Game {
+
+    /**
+     * Get the game resource bundle.
+     *
+     * @return the resource bundle
+     */
+    ResourceBundle bundle();
 
     /**
      * Get the screen.

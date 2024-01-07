@@ -1,7 +1,5 @@
 package coding101.tq;
 
-import static coding101.tq.domain.ColorPalette.color;
-
 import coding101.tq.domain.ColorScheme;
 import coding101.tq.domain.Player;
 import coding101.tq.domain.Settings;
@@ -12,9 +10,7 @@ import coding101.tq.util.TerrainMapBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor.ANSI;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
@@ -35,7 +31,7 @@ import java.util.regex.Matcher;
 /**
  * Console based text adventure game.
  */
-public class TextQuest implements Game {
+public class TextQuest {
 
     private static int INFO_PANE_WIDTH = 20;
     private static int STATUS_PANE_HEIGHT = 1;
@@ -48,9 +44,9 @@ public class TextQuest implements Game {
     private final TextGraphics graphics;
     private final ResourceBundle bundle;
     private final Timer timer;
+    private final GameImpl game;
     private final GameUI ui;
     private TerrainMap activeMap;
-    private TerminalSize screenSize;
     private Path savePath;
 
     /**
@@ -71,14 +67,10 @@ public class TextQuest implements Game {
         this.player = Objects.requireNonNull(player);
         this.mapper = Objects.requireNonNull(mapper);
         this.graphics = screen.newTextGraphics();
-        this.screenSize = screen.getTerminalSize();
         this.bundle = ResourceBundle.getBundle(getClass().getName());
         this.timer = new Timer("TQ Tasks", true);
-        this.ui = new GameUI(
-                new MapPane(this, INFO_PANE_WIDTH + 3, STATUS_PANE_HEIGHT + 3),
-                new InfoPane(this, INFO_PANE_WIDTH, STATUS_PANE_HEIGHT + 3),
-                new StatusPane(this, INFO_PANE_WIDTH + 3, STATUS_PANE_HEIGHT, timer),
-                new HealthPane(this, INFO_PANE_WIDTH, STATUS_PANE_HEIGHT));
+        this.game = new GameImpl();
+        this.ui = new GameUI(this.game, this.timer, INFO_PANE_WIDTH, STATUS_PANE_HEIGHT);
 
         if (player.getActiveMapName().equals(mainMap.getName())) {
             this.activeMap = mainMap;
@@ -87,29 +79,37 @@ public class TextQuest implements Game {
         }
     }
 
-    @Override
-    public Screen screen() {
-        return screen;
-    }
+    private class GameImpl implements Game {
 
-    @Override
-    public TextGraphics textGraphics() {
-        return graphics;
-    }
+        @Override
+        public ResourceBundle bundle() {
+            return bundle;
+        }
 
-    @Override
-    public Settings settings() {
-        return settings;
-    }
+        @Override
+        public Screen screen() {
+            return screen;
+        }
 
-    @Override
-    public Player player() {
-        return player;
-    }
+        @Override
+        public TextGraphics textGraphics() {
+            return graphics;
+        }
 
-    @Override
-    public TerrainMap map() {
-        return activeMap;
+        @Override
+        public Settings settings() {
+            return settings;
+        }
+
+        @Override
+        public Player player() {
+            return player;
+        }
+
+        @Override
+        public TerrainMap map() {
+            return activeMap;
+        }
     }
 
     private void setSavePath(Path path) {
@@ -117,7 +117,7 @@ public class TextQuest implements Game {
     }
 
     public void run() throws IOException {
-        setupScreen();
+        ui.draw();
         while (true) {
             KeyStroke keyStroke = screen.pollInput();
             KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
@@ -127,8 +127,7 @@ public class TextQuest implements Game {
 
             TerminalSize newSize = screen.doResizeIfNecessary();
             if (newSize != null) {
-                screenSize = newSize;
-                setupScreen();
+                ui.draw();
             }
 
             // handle player movement via arrow keys
@@ -169,77 +168,6 @@ public class TextQuest implements Game {
                 }
             }
         }
-    }
-
-    public void setupScreen() throws IOException {
-        // clear screen
-        graphics.setForegroundColor(color(settings.colors().foreground().uiBorder(), ANSI.WHITE));
-        graphics.setBackgroundColor(color(settings.colors().background().uiBorder(), ANSI.BLACK));
-        graphics.fill(' ');
-
-        drawChrome();
-        ui.health().draw();
-        ui.map().draw();
-
-        screen.refresh();
-    }
-
-    private void drawChrome() throws IOException {
-        graphics.setForegroundColor(color(settings.colors().foreground().uiBorder(), ANSI.WHITE));
-        graphics.setBackgroundColor(color(settings.colors().background().uiBorder(), ANSI.BLACK));
-
-        // top
-        graphics.drawLine(1, 0, screenSize.getColumns() - 2, 0, Symbols.DOUBLE_LINE_HORIZONTAL);
-
-        // bottom
-        graphics.drawLine(
-                1,
-                screenSize.getRows() - 1,
-                screenSize.getColumns() - 2,
-                screenSize.getRows() - 1,
-                Symbols.DOUBLE_LINE_HORIZONTAL);
-
-        // left
-        graphics.drawLine(0, 1, 0, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_VERTICAL);
-
-        // right
-        graphics.drawLine(
-                screenSize.getColumns() - 1,
-                1,
-                screenSize.getColumns() - 1,
-                screenSize.getRows() - 2,
-                Symbols.DOUBLE_LINE_VERTICAL);
-
-        // corners
-        graphics.setCharacter(0, 0, Symbols.DOUBLE_LINE_TOP_LEFT_CORNER);
-        graphics.setCharacter(screenSize.getColumns() - 1, 0, Symbols.DOUBLE_LINE_TOP_RIGHT_CORNER);
-        graphics.setCharacter(0, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_BOTTOM_LEFT_CORNER);
-        graphics.setCharacter(
-                screenSize.getColumns() - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
-
-        // bottom status pane
-        final int statusTop = ui.status().top();
-        graphics.setCharacter(0, statusTop - 1, Symbols.DOUBLE_LINE_T_RIGHT);
-        graphics.setCharacter(screenSize.getColumns() - 1, statusTop - 1, Symbols.DOUBLE_LINE_T_LEFT);
-        graphics.drawLine(1, statusTop - 1, screenSize.getColumns() - 2, statusTop - 1, Symbols.DOUBLE_LINE_HORIZONTAL);
-
-        // right info pane
-        final int infoLeft = ui.info().left();
-        graphics.setCharacter(infoLeft - 1, 0, Symbols.DOUBLE_LINE_T_DOWN);
-        graphics.drawLine(infoLeft - 1, 1, infoLeft - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_VERTICAL);
-        graphics.setCharacter(infoLeft - 1, screenSize.getRows() - 3, Symbols.DOUBLE_LINE_CROSS);
-        graphics.setCharacter(infoLeft - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_T_UP);
-
-        // info title
-        graphics.setCharacter(infoLeft - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_RIGHT);
-        graphics.setCharacter(screenSize.getColumns() - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_LEFT);
-        graphics.drawLine(infoLeft, 2, screenSize.getColumns() - 2, 2, Symbols.SINGLE_LINE_HORIZONTAL);
-
-        graphics.setForegroundColor(color(settings.colors().foreground().uiText(), ANSI.WHITE_BRIGHT));
-        graphics.setBackgroundColor(color(settings.colors().background().uiText(), ANSI.BLACK));
-
-        String inventory = bundle.getString("inventory");
-        graphics.putString(infoLeft + (INFO_PANE_WIDTH - inventory.length()) / 2, 1, inventory);
     }
 
     private void iteractWithCave() throws IOException {

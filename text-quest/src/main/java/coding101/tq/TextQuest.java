@@ -26,16 +26,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Timer;
 import java.util.regex.Matcher;
 
 /**
  * Console based text adventure game.
  */
-public class TextQuest {
+public class TextQuest implements Game {
 
     private static int INFO_PANE_WIDTH = 20;
+    private static int STATUS_PANE_HEIGHT = 1;
 
     private final Screen screen;
     private final Settings settings;
@@ -44,6 +47,8 @@ public class TextQuest {
     private final ObjectMapper mapper;
     private final TextGraphics graphics;
     private final ResourceBundle bundle;
+    private final Timer timer;
+    private final GameUI ui;
     private TerrainMap activeMap;
     private TerminalSize screenSize;
     private Path savePath;
@@ -68,12 +73,43 @@ public class TextQuest {
         this.graphics = screen.newTextGraphics();
         this.screenSize = screen.getTerminalSize();
         this.bundle = ResourceBundle.getBundle(getClass().getName());
+        this.timer = new Timer("TQ Tasks", true);
+        this.ui = new GameUI(
+                new MapPane(this, INFO_PANE_WIDTH + 3, STATUS_PANE_HEIGHT + 3),
+                new InfoPane(this, INFO_PANE_WIDTH, STATUS_PANE_HEIGHT + 3),
+                new StatusPane(this, INFO_PANE_WIDTH + 3, STATUS_PANE_HEIGHT, timer),
+                new HealthPane(this, INFO_PANE_WIDTH, STATUS_PANE_HEIGHT));
 
         if (player.getActiveMapName().equals(mainMap.getName())) {
             this.activeMap = mainMap;
         } else {
             this.activeMap = loadChildMap(player.getActiveMapName());
         }
+    }
+
+    @Override
+    public Screen screen() {
+        return screen;
+    }
+
+    @Override
+    public TextGraphics textGraphics() {
+        return graphics;
+    }
+
+    @Override
+    public Settings settings() {
+        return settings;
+    }
+
+    @Override
+    public Player player() {
+        return player;
+    }
+
+    @Override
+    public TerrainMap map() {
+        return activeMap;
     }
 
     private void setSavePath(Path path) {
@@ -83,7 +119,7 @@ public class TextQuest {
     public void run() throws IOException {
         setupScreen();
         while (true) {
-            KeyStroke keyStroke = screen.readInput();
+            KeyStroke keyStroke = screen.pollInput();
             KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
             if (keyType == KeyType.Escape || keyType == KeyType.EOF) {
                 return;
@@ -110,7 +146,7 @@ public class TextQuest {
             if (newX != player.getX() || newY != player.getY() && activeMap.canPlayerMoveTo(newX, newY)) {
                 // move player
                 if (newX >= 0 && newY >= 0) {
-                    movePlayer(newX, newY);
+                    ui.map().movePlayer(newX, newY);
                     screen.refresh();
                 }
                 continue;
@@ -142,53 +178,10 @@ public class TextQuest {
         graphics.fill(' ');
 
         drawChrome();
-        drawHealth();
-
-        drawMapForPoint(activeMap, player.getX(), player.getY());
-
-        drawPlayer();
+        ui.health().draw();
+        ui.map().draw();
 
         screen.refresh();
-    }
-
-    private final int infoPaneLeft() {
-        return screenSize.getColumns() - INFO_PANE_WIDTH - 1;
-    }
-
-    private final int infoPaneTop() {
-        return 3;
-    }
-
-    private final int statusPaneLeft() {
-        return 1;
-    }
-
-    private final int statusPaneTop() {
-        return screenSize.getRows() - 2;
-    }
-
-    private final int mapPaneTop() {
-        return 1;
-    }
-
-    private final int mapPaneLeft() {
-        return 1;
-    }
-
-    private final int mapPaneRight() {
-        return infoPaneLeft() - 2;
-    }
-
-    private final int mapPaneBottom() {
-        return statusPaneTop() - 2;
-    }
-
-    private final int mapPaneWidth() {
-        return mapPaneRight() - mapPaneLeft() + 1;
-    }
-
-    private final int mapPaneHeight() {
-        return mapPaneBottom() - mapPaneTop() + 1;
     }
 
     private void drawChrome() throws IOException {
@@ -225,128 +218,28 @@ public class TextQuest {
                 screenSize.getColumns() - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_BOTTOM_RIGHT_CORNER);
 
         // bottom status pane
-        graphics.setCharacter(0, statusPaneTop() - 1, Symbols.DOUBLE_LINE_T_RIGHT);
-        graphics.setCharacter(screenSize.getColumns() - 1, statusPaneTop() - 1, Symbols.DOUBLE_LINE_T_LEFT);
-        graphics.drawLine(
-                1,
-                statusPaneTop() - 1,
-                screenSize.getColumns() - 2,
-                statusPaneTop() - 1,
-                Symbols.DOUBLE_LINE_HORIZONTAL);
+        final int statusTop = ui.status().top();
+        graphics.setCharacter(0, statusTop - 1, Symbols.DOUBLE_LINE_T_RIGHT);
+        graphics.setCharacter(screenSize.getColumns() - 1, statusTop - 1, Symbols.DOUBLE_LINE_T_LEFT);
+        graphics.drawLine(1, statusTop - 1, screenSize.getColumns() - 2, statusTop - 1, Symbols.DOUBLE_LINE_HORIZONTAL);
 
         // right info pane
-        graphics.setCharacter(infoPaneLeft() - 1, 0, Symbols.DOUBLE_LINE_T_DOWN);
-        graphics.drawLine(
-                infoPaneLeft() - 1, 1, infoPaneLeft() - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_VERTICAL);
-        graphics.setCharacter(infoPaneLeft() - 1, screenSize.getRows() - 3, Symbols.DOUBLE_LINE_CROSS);
-        graphics.setCharacter(infoPaneLeft() - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_T_UP);
+        final int infoLeft = ui.info().left();
+        graphics.setCharacter(infoLeft - 1, 0, Symbols.DOUBLE_LINE_T_DOWN);
+        graphics.drawLine(infoLeft - 1, 1, infoLeft - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_VERTICAL);
+        graphics.setCharacter(infoLeft - 1, screenSize.getRows() - 3, Symbols.DOUBLE_LINE_CROSS);
+        graphics.setCharacter(infoLeft - 1, screenSize.getRows() - 1, Symbols.DOUBLE_LINE_T_UP);
 
         // info title
-        graphics.setCharacter(infoPaneLeft() - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_RIGHT);
+        graphics.setCharacter(infoLeft - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_RIGHT);
         graphics.setCharacter(screenSize.getColumns() - 1, 2, Symbols.DOUBLE_LINE_T_SINGLE_LEFT);
-        graphics.drawLine(infoPaneLeft(), 2, screenSize.getColumns() - 2, 2, Symbols.SINGLE_LINE_HORIZONTAL);
+        graphics.drawLine(infoLeft, 2, screenSize.getColumns() - 2, 2, Symbols.SINGLE_LINE_HORIZONTAL);
 
         graphics.setForegroundColor(color(settings.colors().foreground().uiText(), ANSI.WHITE_BRIGHT));
         graphics.setBackgroundColor(color(settings.colors().background().uiText(), ANSI.BLACK));
 
         String inventory = bundle.getString("inventory");
-        graphics.putString(infoPaneLeft() + (INFO_PANE_WIDTH - inventory.length()) / 2, 1, inventory);
-    }
-
-    /** The amount of health each display heart represents. */
-    public static final int PLAYER_HEALTH_HEART_VALUE = 5;
-
-    private void drawHealth() {
-        int health = player.getHealth();
-        int partial = health % PLAYER_HEALTH_HEART_VALUE;
-        int full = (health - partial) / PLAYER_HEALTH_HEART_VALUE;
-        int y = statusPaneTop();
-        int startX = infoPaneLeft();
-
-        graphics.setForegroundColor(color(settings.colors().foreground().health(), ANSI.RED));
-        graphics.setBackgroundColor(color(settings.colors().background().health(), ANSI.BLACK));
-
-        // draw all full hearts
-        for (int row = startX, max = startX + full; row < max; row++) {
-            graphics.setCharacter(row, y, Symbols.HEART);
-        }
-
-        // if a partial heart, draw using a different color
-        if (partial > 0) {
-            graphics.setForegroundColor(color(settings.colors().foreground().healthPartial(), ANSI.RED_BRIGHT));
-            graphics.setCharacter(startX + full, y, Symbols.HEART);
-        }
-
-        // draw blanks to "erase" any lost hearts
-        for (int row = startX + full + (partial > 0 ? 1 : 0),
-                        max = startX + Player.MAX_HEALTH / PLAYER_HEALTH_HEART_VALUE;
-                row < max;
-                row++) {
-            graphics.setCharacter(row, y, ' ');
-        }
-    }
-
-    private void drawMapForPoint(TerrainMap map, int x, int y) {
-        final int paneWidth = mapPaneWidth();
-        final int paneHeight = mapPaneHeight();
-        final int paneTop = mapPaneTop();
-        final int paneLeft = mapPaneLeft();
-        final int startX = (x / paneWidth) * paneWidth;
-        final int startY = (y / paneHeight) * paneHeight;
-        map.walk(startX, startY, paneWidth, paneHeight, (col, row, t) -> {
-            drawTerrain(col - startX + paneLeft, row - startY + paneTop, t);
-            graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
-            graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
-            char c = t != null ? t.getKey() : TerrainType.EMPTY;
-            if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
-                c = Symbols.BLOCK_SOLID;
-            }
-            graphics.setCharacter(col - startX + paneLeft, row - startY + paneTop, c);
-        });
-    }
-
-    private void drawTerrain(int screenCol, int screenRow, TerrainType t) {
-        graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
-        graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
-        char c = t != null ? t.getKey() : TerrainType.EMPTY;
-        if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
-            c = Symbols.BLOCK_SOLID;
-        }
-        graphics.setCharacter(screenCol, screenRow, c);
-    }
-
-    private void drawPlayer() {
-        final int paneWidth = mapPaneWidth();
-        final int paneHeight = mapPaneHeight();
-        final int paneTop = mapPaneTop();
-        final int paneLeft = mapPaneLeft();
-        final int startX = (player.getX() / paneWidth) * paneWidth;
-        final int startY = (player.getY() / paneHeight) * paneHeight;
-        graphics.setForegroundColor(color(settings.colors().foreground().player(), ANSI.WHITE_BRIGHT));
-        graphics.setBackgroundColor(color(settings.colors().background().player(), ANSI.MAGENTA_BRIGHT));
-        graphics.setCharacter(player.getX() - startX + paneLeft, player.getY() - startY + paneTop, '@');
-    }
-
-    private void movePlayer(int newX, int newY) {
-        // draw old position terrain
-        final int paneWidth = mapPaneWidth();
-        final int paneHeight = mapPaneHeight();
-        final int paneTop = mapPaneTop();
-        final int paneLeft = mapPaneLeft();
-        final int startX = (player.getX() / paneWidth) * paneWidth;
-        final int startY = (player.getY() / paneHeight) * paneHeight;
-
-        final int newStartX = (newX / paneWidth) * paneWidth;
-        final int newStartY = (newY / paneHeight) * paneHeight;
-        if (newStartX != startX || newStartY != startY) {
-            // redraw entire map
-            drawMapForPoint(activeMap, newX, newY);
-        } else {
-            TerrainType t = activeMap.terrainAt(player.getX(), player.getY());
-            drawTerrain(player.getX() - startX + paneLeft, player.getY() - startY + paneTop, t);
-        }
-        player.moveTo(activeMap, newX, newY);
-        drawPlayer();
+        graphics.putString(infoLeft + (INFO_PANE_WIDTH - inventory.length()) / 2, 1, inventory);
     }
 
     private void iteractWithCave() throws IOException {
@@ -368,8 +261,7 @@ public class TextQuest {
                 activeMap = mainMap;
             }
         }
-        drawMapForPoint(activeMap, player.getX(), player.getY());
-        drawPlayer();
+        ui.map().draw();
         screen.refresh();
     }
 
@@ -378,13 +270,16 @@ public class TextQuest {
                 .build(mapName);
     }
 
-    private void saveGame() {
+    private void saveGame() throws IOException {
         try {
             new Persistence(mapper).savePlayer(player, savePath);
+            ui.status().drawMessage(bundle.getString("game.save.ok"), 2);
             // TODO: write success message
         } catch (IOException e) {
-            // TODO: write error message
+            ui.status()
+                    .drawMessage(MessageFormat.format(bundle.getString("game.save.error"), e.getLocalizedMessage()), 2);
         }
+        screen.refresh();
     }
 
     public static void main(String[] args) {

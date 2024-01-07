@@ -95,8 +95,10 @@ public class TextQuest {
             }
             if (newX != player.getX() || newY != player.getY() && activeMap.canPlayerMoveTo(newX, newY)) {
                 // move player
-                movePlayer(newX, newY);
-                screen.refresh();
+                if (newX >= 0 && newY >= 0) {
+                    movePlayer(newX, newY);
+                    screen.refresh();
+                }
                 continue;
             }
 

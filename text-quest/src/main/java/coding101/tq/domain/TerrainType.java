@@ -1,5 +1,8 @@
 package coding101.tq.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Enumeration of terrain types.
  */
@@ -54,6 +57,7 @@ public enum TerrainType {
      *
      * @return the key
      */
+    @JsonValue
     public char getKey() {
         return key;
     }
@@ -66,6 +70,7 @@ public enum TerrainType {
      * @param key the key to get the enum value for
      * @return the enum value
      */
+    @JsonCreator
     public static final TerrainType forKey(char key) {
         return switch (key) {
             case MOUNTAIN -> Mountain;

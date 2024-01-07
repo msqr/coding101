@@ -29,7 +29,9 @@ The following keys are used to interact with the game:
 | <kbd>↓</kbd> | Move down |
 | <kbd>Space</kbd> | Interact (enter, open, and so on) |
 | <kbd>⏎ Enter</kbd> | Accept |
-| <kbd>q</kbd> | Reject |
+| <kbd>n</kbd> | Reject |
+| <kbd>s</kbd> | Save game |
+| <kbd>Esc</kbd> | Quit game |
 
 ## Terrain symbols
 

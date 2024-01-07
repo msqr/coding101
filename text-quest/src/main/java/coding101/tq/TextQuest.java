@@ -7,6 +7,7 @@ import coding101.tq.domain.Player;
 import coding101.tq.domain.Settings;
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.domain.TerrainType;
+import coding101.tq.util.Persistence;
 import coding101.tq.util.TerrainMapBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -22,6 +23,9 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -42,6 +46,7 @@ public class TextQuest {
     private final ResourceBundle bundle;
     private TerrainMap activeMap;
     private TerminalSize screenSize;
+    private Path savePath;
 
     /**
      * Constructor.
@@ -61,9 +66,18 @@ public class TextQuest {
         this.player = Objects.requireNonNull(player);
         this.mapper = Objects.requireNonNull(mapper);
         this.graphics = screen.newTextGraphics();
-        this.activeMap = mainMap;
         this.screenSize = screen.getTerminalSize();
         this.bundle = ResourceBundle.getBundle("coding101.tq.TextQuest");
+
+        if (player.getActiveMapName().equals(mainMap.getName())) {
+            this.activeMap = mainMap;
+        } else {
+            this.activeMap = loadChildMap(player.getActiveMapName());
+        }
+    }
+
+    private void setSavePath(Path path) {
+        this.savePath = Objects.requireNonNull(path);
     }
 
     public void run() throws IOException {
@@ -102,14 +116,20 @@ public class TextQuest {
                 continue;
             }
 
-            if (keyType == KeyType.Character && keyStroke.getCharacter().charValue() == ' ') {
-                // check terrain for possible enter/exit
-                TerrainType t = activeMap.terrainAt(player.getX(), player.getY());
-                switch (t) {
-                    case Cave -> iteractWithCave();
-                    default -> {
-                        // nothing to do
+            if (keyType == KeyType.Character) {
+                final char key = Character.toLowerCase(keyStroke.getCharacter().charValue());
+                if (key == ' ') {
+                    // check terrain for possible enter/exit
+                    TerrainType t = activeMap.terrainAt(player.getX(), player.getY());
+                    switch (t) {
+                        case Cave -> iteractWithCave();
+                        default -> {
+                            // nothing to do
+                        }
                     }
+                } else if (key == 's') {
+                    // save game
+                    saveGame();
                 }
             }
         }
@@ -337,9 +357,7 @@ public class TextQuest {
         if (activeMap == mainMap) {
             // enter cave
             String mapName = "%04d,%04d".formatted(x, y);
-            TerrainMap caveMap = TerrainMapBuilder.parseResources(
-                            "META-INF/tqmaps/%s/%s".formatted(mainMap.getName(), mapName))
-                    .build(mapName);
+            TerrainMap caveMap = loadChildMap(mapName);
             player.moveTo(caveMap, caveMap.startingCoordinate());
             activeMap = caveMap;
         } else {
@@ -353,6 +371,20 @@ public class TextQuest {
         drawMapForPoint(activeMap, player.getX(), player.getY());
         drawPlayer();
         screen.refresh();
+    }
+
+    private TerrainMap loadChildMap(String mapName) {
+        return TerrainMapBuilder.parseResources("META-INF/tqmaps/%s/%s".formatted(mainMap.getName(), mapName))
+                .build(mapName);
+    }
+
+    private void saveGame() {
+        try {
+            new Persistence(mapper).savePlayer(player, savePath);
+            // TODO: write success message
+        } catch (IOException e) {
+            // TODO: write error message
+        }
     }
 
     public static void main(String[] args) {
@@ -385,9 +417,15 @@ public class TextQuest {
             Settings settings = new Settings(colors);
 
             // create player
-            // TODO: load saved player
-            Player player = new Player();
-            player.moveTo(mainMap, mainMap.startingCoordinate());
+            Player player = null;
+            // TODO: allow save path command-line switch
+            Path save = Paths.get("game.tqsave");
+            if (Files.isReadable(save)) {
+                player = new Persistence(mapper).loadPlayer(save);
+            } else {
+                player = new Player();
+                player.moveTo(mainMap, mainMap.startingCoordinate());
+            }
 
             // create text screen on top of our terminal
             Screen screen = new TerminalScreen(terminal);
@@ -395,6 +433,7 @@ public class TextQuest {
                 screen.startScreen();
                 screen.setCursorPosition(null);
                 TextQuest tq = new TextQuest(screen, settings, mainMap, player, mapper);
+                tq.setSavePath(save);
                 tq.run();
             } finally {
                 screen.stopScreen();

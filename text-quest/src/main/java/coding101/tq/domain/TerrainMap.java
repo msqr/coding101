@@ -1,5 +1,8 @@
 package coding101.tq.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,7 +38,11 @@ public class TerrainMap {
      * @param metadata the metadata
      * @throws IllegalArgumentException if any argument is {@litearl null}
      */
-    public TerrainMap(String name, TerrainType[][] terrain, Map<String, String> metadata) {
+    @JsonCreator
+    public TerrainMap(
+            @JsonProperty("name") String name,
+            @JsonProperty("terrain") TerrainType[][] terrain,
+            @JsonProperty("metadata") Map<String, String> metadata) {
         super();
         this.name = Objects.requireNonNull(name);
         this.terrain = Objects.requireNonNull(terrain);
@@ -91,8 +98,19 @@ public class TerrainMap {
      *
      * @return the metadata
      */
+    @JsonGetter(value = "metadata")
     public Map<String, String> metadata() {
         return metadata;
+    }
+
+    /**
+     * Get the terrain.
+     *
+     * @return the terrain
+     */
+    @JsonGetter(value = "terrain")
+    public TerrainType[][] terrain() {
+        return terrain;
     }
 
     /**

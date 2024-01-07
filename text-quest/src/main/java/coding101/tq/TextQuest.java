@@ -67,7 +67,7 @@ public class TextQuest {
         this.mapper = Objects.requireNonNull(mapper);
         this.graphics = screen.newTextGraphics();
         this.screenSize = screen.getTerminalSize();
-        this.bundle = ResourceBundle.getBundle("coding101.tq.TextQuest");
+        this.bundle = ResourceBundle.getBundle(getClass().getName());
 
         if (player.getActiveMapName().equals(mainMap.getName())) {
             this.activeMap = mainMap;

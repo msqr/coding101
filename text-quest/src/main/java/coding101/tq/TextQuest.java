@@ -390,8 +390,8 @@ public class TextQuest {
     public static void main(String[] args) {
         try (Terminal terminal = new DefaultTerminalFactory().createTerminal()) {
             TerminalSize screenSize = terminal.getTerminalSize();
-            if (screenSize.getColumns() < 30 || screenSize.getRows() < 18) {
-                System.err.println("Terminal must be at least 80x24.");
+            if (screenSize.getColumns() < 30 || screenSize.getRows() < 10) {
+                System.err.println("Terminal must be at least 30x10.");
                 System.exit(1);
             }
 

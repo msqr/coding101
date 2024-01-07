@@ -116,6 +116,14 @@ public class TextQuest {
         this.savePath = Objects.requireNonNull(path);
     }
 
+    /**
+     * Start the main game loop.
+     *
+     * This method will process key inputs and re-draw the game, until the game is
+     * quit via the Escape key, Ctl-C, and so on.
+     *
+     * @throws IOException if an IO error occurs
+     */
     public void run() throws IOException {
         ui.draw();
         while (true) {

@@ -21,7 +21,9 @@ public record ColorPalette(
         String lava,
         String mountain,
         String town,
-        String water) {
+        String water,
+        String wall,
+        String chest) {
 
     /**
      * A Vim-compatible terminal color mapping of lower-case names to associated
@@ -97,12 +99,14 @@ public record ColorPalette(
         }
         return switch (type) {
             case Cave -> color(cave(), defaultColor);
+            case Chest -> color(chest(), defaultColor);
             case Empty -> defaultColor;
             case Forest -> color(forest(), defaultColor);
             case Grass -> color(grass(), defaultColor);
             case Lava -> color(lava(), defaultColor);
             case Mountain -> color(mountain(), defaultColor);
             case Town -> color(town(), defaultColor);
+            case WallCorner, WallHorizontal, WallVertical -> color(wall(), defaultColor);
             case Water -> color(water(), defaultColor);
         };
     }

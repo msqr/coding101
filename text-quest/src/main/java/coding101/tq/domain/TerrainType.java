@@ -19,6 +19,14 @@ public enum TerrainType {
     Cave(TerrainType.CAVE),
 
     Town(TerrainType.TOWN),
+
+    Chest(TerrainType.CHEST),
+
+    WallHorizontal(TerrainType.WALL_HORIZONTAL),
+
+    WallVertical(TerrainType.WALL_VERTICAL),
+
+    WallCorner(TerrainType.WALL_CORNER),
     ;
 
     public static final char EMPTY = ' ';
@@ -29,6 +37,11 @@ public enum TerrainType {
     public static final char LAVA = '=';
     public static final char CAVE = 'O';
     public static final char TOWN = '*';
+    public static final char CHEST = '%';
+
+    public static final char WALL_VERTICAL = '|';
+    public static final char WALL_HORIZONTAL = '-';
+    public static final char WALL_CORNER = '+';
 
     private final char key;
 
@@ -62,6 +75,10 @@ public enum TerrainType {
             case LAVA -> Lava;
             case CAVE -> Cave;
             case TOWN -> Town;
+            case CHEST -> Chest;
+            case WALL_CORNER -> WallCorner;
+            case WALL_HORIZONTAL -> WallHorizontal;
+            case WALL_VERTICAL -> WallVertical;
             default -> Empty;
         };
     }

@@ -24,6 +24,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
 
 /**
  * Console based text adventure game.
@@ -96,9 +97,19 @@ public class TextQuest {
                 // move player
                 movePlayer(newX, newY);
                 screen.refresh();
+                continue;
             }
 
-            Thread.yield();
+            if (keyType == KeyType.Character && keyStroke.getCharacter().charValue() == ' ') {
+                // check terrain for possible enter/exit
+                TerrainType t = activeMap.terrainAt(player.getX(), player.getY());
+                switch (t) {
+                    case Cave -> iteractWithCave();
+                    default -> {
+                        // nothing to do
+                    }
+                }
+            }
         }
     }
 
@@ -111,7 +122,7 @@ public class TextQuest {
         drawChrome();
         drawHealth();
 
-        drawMapForPoint(mainMap, player.getX(), player.getY());
+        drawMapForPoint(activeMap, player.getX(), player.getY());
 
         drawPlayer();
 
@@ -261,11 +272,25 @@ public class TextQuest {
         final int startX = (x / paneWidth) * paneWidth;
         final int startY = (y / paneHeight) * paneHeight;
         map.walk(startX, startY, paneWidth, paneHeight, (col, row, t) -> {
+            drawTerrain(col - startX + paneLeft, row - startY + paneTop, t);
             graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
             graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
-            graphics.setCharacter(
-                    col - startX + paneLeft, row - startY + paneTop, t != null ? t.getKey() : TerrainType.EMPTY);
+            char c = t != null ? t.getKey() : TerrainType.EMPTY;
+            if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
+                c = Symbols.BLOCK_SOLID;
+            }
+            graphics.setCharacter(col - startX + paneLeft, row - startY + paneTop, c);
         });
+    }
+
+    private void drawTerrain(int screenCol, int screenRow, TerrainType t) {
+        graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
+        graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
+        char c = t != null ? t.getKey() : TerrainType.EMPTY;
+        if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
+            c = Symbols.BLOCK_SOLID;
+        }
+        graphics.setCharacter(screenCol, screenRow, c);
     }
 
     private void drawPlayer() {
@@ -296,15 +321,36 @@ public class TextQuest {
             drawMapForPoint(activeMap, newX, newY);
         } else {
             TerrainType t = activeMap.terrainAt(player.getX(), player.getY());
-            graphics.setForegroundColor(settings.colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
-            graphics.setBackgroundColor(settings.colors().background().terrain(t, ANSI.BLACK));
-            graphics.setCharacter(
-                    player.getX() - startX + paneLeft,
-                    player.getY() - startY + paneTop,
-                    t != null ? t.getKey() : TerrainType.EMPTY);
+            drawTerrain(player.getX() - startX + paneLeft, player.getY() - startY + paneTop, t);
         }
         player.moveTo(activeMap, newX, newY);
         drawPlayer();
+    }
+
+    private void iteractWithCave() throws IOException {
+        // if the active map is the main map, we want to enter a cave, otherwise we want
+        // to exit back to the main map
+        final int x = player.getX();
+        final int y = player.getY();
+        if (activeMap == mainMap) {
+            // enter cave
+            String mapName = "%04d,%04d".formatted(x, y);
+            TerrainMap caveMap = TerrainMapBuilder.parseResources(
+                            "META-INF/tqmaps/%s/%s".formatted(mainMap.getName(), mapName))
+                    .build(mapName);
+            player.moveTo(caveMap, caveMap.startingCoordinate());
+            activeMap = caveMap;
+        } else {
+            // exit cave, to the coordinate that is the map name
+            Matcher m = TerrainMap.COORDINATE_REGEX.matcher(activeMap.getName());
+            if (m.find()) {
+                player.moveTo(mainMap, Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)));
+                activeMap = mainMap;
+            }
+        }
+        drawMapForPoint(activeMap, player.getX(), player.getY());
+        drawPlayer();
+        screen.refresh();
     }
 
     public static void main(String[] args) {

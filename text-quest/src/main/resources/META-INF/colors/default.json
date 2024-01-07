@@ -6,12 +6,14 @@
 		"healthPartial": "Black",
 		"player":        "White",
 		"cave":          "#555555",
+		"chest":         "Black",
 		"forest":        "#04AA00",
 		"grass":         "#55FF55",
 		"lava":          "#A90100",
 		"mountain":      "#999999",
 		"town":          "#FEFF55",
-		"water":         "#0000AA"
+		"water":         "#0000AA",
+		"wall":          "Black"
 	},
 	"foreground": {
 		"uiText":        "White",
@@ -20,11 +22,13 @@
 		"healthPartial": "LightRed",
 		"player":        "LightMagenta",
 		"cave":          "#FFFFFF",
+		"chest":         "Yellow",
 		"forest":        "#AA5500",
 		"grass":         "#04AA00",
 		"lava":          "#FF5555",
 		"mountain":      "#FFFFFF",
 		"town":          "#AA5500",
-		"water":         "#5655FF"
+		"water":         "#5655FF",
+		"wall":          "DarkGray"
 	}
 }

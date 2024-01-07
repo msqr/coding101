@@ -103,9 +103,25 @@ public class GameUI implements Pane {
         game.textGraphics().fill(' ');
 
         drawChrome();
-        health().draw();
         map().draw();
+        info().draw();
+        status().draw();
+        health().draw();
 
+        try {
+            game.screen().refresh();
+        } catch (IOException e) {
+            throw new RuntimeException("Error refreshing screen: %s".formatted(e.getMessage()), e);
+        }
+    }
+
+    /**
+     * Draw a single pane and refresh the screen.
+     *
+     * @param pane the pane to draw
+     */
+    public void draw(Pane pane) {
+        pane.draw();
         try {
             game.screen().refresh();
         } catch (IOException e) {

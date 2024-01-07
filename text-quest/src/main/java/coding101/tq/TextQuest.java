@@ -36,6 +36,11 @@ public class TextQuest {
     private static int INFO_PANE_WIDTH = 20;
     private static int STATUS_PANE_HEIGHT = 1;
 
+    private static int MESSAGE_CLEAR_DELAY = 2;
+
+    private static char INTERACT_KEY = ' ';
+    private static char SAVE_KEY = 's';
+
     private final Screen screen;
     private final Settings settings;
     private final TerrainMap mainMap;
@@ -161,16 +166,17 @@ public class TextQuest {
 
             if (keyType == KeyType.Character) {
                 final char key = Character.toLowerCase(keyStroke.getCharacter().charValue());
-                if (key == ' ') {
+                if (key == INTERACT_KEY) {
                     // check terrain for possible enter/exit
                     TerrainType t = activeMap.terrainAt(player.getX(), player.getY());
                     switch (t) {
-                        case Cave -> iteractWithCave();
+                        case Cave -> interactWithCave();
+                        case Chest -> interactWithChest();
                         default -> {
                             // nothing to do
                         }
                     }
-                } else if (key == 's') {
+                } else if (key == SAVE_KEY) {
                     // save game
                     saveGame();
                 }
@@ -178,7 +184,7 @@ public class TextQuest {
         }
     }
 
-    private void iteractWithCave() throws IOException {
+    private void interactWithCave() {
         // if the active map is the main map, we want to enter a cave, otherwise we want
         // to exit back to the main map
         final int x = player.getX();
@@ -187,8 +193,8 @@ public class TextQuest {
             // enter cave
             String mapName = "%04d,%04d".formatted(x, y);
             TerrainMap caveMap = loadChildMap(mapName);
-            player.moveTo(caveMap, caveMap.startingCoordinate());
             activeMap = caveMap;
+            player.moveTo(caveMap, caveMap.startingCoordinate());
         } else {
             // exit cave, to the coordinate that is the map name
             Matcher m = TerrainMap.COORDINATE_REGEX.matcher(activeMap.getName());
@@ -197,7 +203,28 @@ public class TextQuest {
                 activeMap = mainMap;
             }
         }
-        ui.map().draw();
+        ui.draw(ui.map());
+    }
+
+    private void interactWithChest() throws IOException {
+        final int x = player.getX();
+        final int y = player.getY();
+        String message = null; // message to show the outcome of interacting with the chest
+        if (player.interacted(game.map(), x, y)) {
+            // TODO: open chest and deal with outcome
+            int coinsFound = 0;
+            if (coinsFound > 0) {
+                message = MessageFormat.format(bundle.getString("chest.coinsAcquired"), coinsFound);
+            } else {
+                message = bundle.getString("chest.empty");
+            }
+        } else {
+            // show message that chest has already been opened
+            message = bundle.getString("chest.alreadyOpened");
+        }
+        if (message != null) {
+            ui.status().drawMessage(message, MESSAGE_CLEAR_DELAY);
+        }
         screen.refresh();
     }
 
@@ -209,11 +236,13 @@ public class TextQuest {
     private void saveGame() throws IOException {
         try {
             new Persistence(mapper).savePlayer(player, savePath);
-            ui.status().drawMessage(bundle.getString("game.save.ok"), 2);
+            ui.status().drawMessage(bundle.getString("game.save.ok"), MESSAGE_CLEAR_DELAY);
             // TODO: write success message
         } catch (IOException e) {
             ui.status()
-                    .drawMessage(MessageFormat.format(bundle.getString("game.save.error"), e.getLocalizedMessage()), 2);
+                    .drawMessage(
+                            MessageFormat.format(bundle.getString("game.save.error"), e.getLocalizedMessage()),
+                            MESSAGE_CLEAR_DELAY);
         }
         screen.refresh();
     }

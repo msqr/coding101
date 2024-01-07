@@ -3,6 +3,8 @@ package coding101.tq.domain;
 import coding101.tq.util.TerrainMapBuilder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A player.
@@ -20,6 +22,7 @@ public class Player {
     private int x;
     private int y;
     private Map<String, TerrainMap> visitedMaps = new HashMap<>(2);
+    private Map<String, Set<Coordinate>> interactions = new HashMap<>(16);
 
     /**
      * Constructor.
@@ -40,7 +43,7 @@ public class Player {
     /**
      * Set the active map name.
      *
-     * @param activeMapName the active map nameto set
+     * @param activeMapName the active map name to set
      */
     public void setActiveMapName(String activeMapName) {
         this.activeMapName = activeMapName;
@@ -174,12 +177,62 @@ public class Player {
     /**
      * Set the visited map data.
      *
-     * @param visitedMaps the visitedMaps to set
+     * @param visitedMaps the visited maps to set
      */
     public void setVisitedMaps(Map<String, TerrainMap> visitedMaps) {
         if (visitedMaps == null) {
             visitedMaps = new HashMap<>(2);
         }
         this.visitedMaps = visitedMaps;
+    }
+
+    /**
+     * Mark a specific map coordinate as interacted with.
+     *
+     * @param map the map
+     * @param x   the x coordinate
+     * @param y   the y coordinate
+     * @return {@code true} if the coordinate was not interacted with before
+     */
+    public boolean interacted(TerrainMap map, int x, int y) {
+        assert map != null;
+        // use TreeMap here just for convenience of keeping coordinates sorted for
+        // persistence
+        Set<Coordinate> mapInteractions = interactions.computeIfAbsent(map.getName(), k -> new TreeSet<>());
+        return mapInteractions.add(new Coordinate(x, y));
+    }
+
+    /**
+     * Test if a specific map coordinate has been interacted with before.
+     *
+     * @param map the map
+     * @param x   the x coordinate
+     * @param y   the y coordinate
+     * @return {@code true} if the coordinate has been interacted with before
+     */
+    public boolean hasInteracted(TerrainMap map, int x, int y) {
+        Set<Coordinate> mapInteractions = interactions.get(map.getName());
+        return (mapInteractions != null ? mapInteractions.contains(new Coordinate(x, y)) : false);
+    }
+
+    /**
+     * Get the interactions data.
+     *
+     * This is a mapping of {@link TerrainMap} names to associated coordinates at
+     * which the player has "interacted" already, for example by opening a chest.
+     *
+     * @return the interactions, never {@literal null}
+     */
+    public Map<String, Set<Coordinate>> getInteractions() {
+        return interactions;
+    }
+
+    /**
+     * Set the interactions data.
+     *
+     * @param interactions the interactions to set
+     */
+    public void setInteractions(Map<String, Set<Coordinate>> interactions) {
+        this.interactions = interactions;
     }
 }

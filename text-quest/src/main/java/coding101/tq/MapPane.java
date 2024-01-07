@@ -7,6 +7,7 @@ import coding101.tq.domain.Player;
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.domain.TerrainType;
 import com.googlecode.lanterna.Symbols;
+import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.TextColor.ANSI;
 
 /**
@@ -83,7 +84,12 @@ public final class MapPane implements Pane {
         } else {
             TerrainType t =
                     game.map().terrainAt(game.player().getX(), game.player().getY());
-            drawTerrain(game.player().getX() - startX + paneLeft, game.player().getY() - startY + paneTop, t);
+            drawTerrain(
+                    game.player().getX(),
+                    game.player().getY(),
+                    game.player().getX() - startX + paneLeft,
+                    game.player().getY() - startY + paneTop,
+                    t);
         }
         game.player().moveTo(game.map(), newX, newY);
         drawPlayer(game.player());
@@ -97,28 +103,22 @@ public final class MapPane implements Pane {
         final int startX = (x / paneWidth) * paneWidth;
         final int startY = (y / paneHeight) * paneHeight;
         map.walk(startX, startY, paneWidth, paneHeight, (col, row, t) -> {
-            drawTerrain(col - startX + paneLeft, row - startY + paneTop, t);
-            game.textGraphics()
-                    .setForegroundColor(game.settings().colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
-            game.textGraphics()
-                    .setBackgroundColor(game.settings().colors().background().terrain(t, ANSI.BLACK));
-            char c = t != null ? t.getKey() : TerrainType.EMPTY;
-            if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
-                c = Symbols.BLOCK_SOLID;
-            }
-            game.textGraphics().setCharacter(col - startX + paneLeft, row - startY + paneTop, c);
+            drawTerrain(col, row, col - startX + paneLeft, row - startY + paneTop, t);
         });
     }
 
-    private void drawTerrain(int screenCol, int screenRow, TerrainType t) {
-        game.textGraphics()
-                .setForegroundColor(game.settings().colors().foreground().terrain(t, ANSI.WHITE_BRIGHT));
-        game.textGraphics()
-                .setBackgroundColor(game.settings().colors().background().terrain(t, ANSI.BLACK));
+    private void drawTerrain(int x, int y, int screenCol, int screenRow, TerrainType t) {
+        TextColor fg = game.settings().colors().foreground().terrain(t, ANSI.WHITE_BRIGHT);
         char c = t != null ? t.getKey() : TerrainType.EMPTY;
         if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
             c = Symbols.BLOCK_SOLID;
+        } else if (c == TerrainType.CHEST && game.player().hasInteracted(game.map(), x, y)) {
+            // this chest has been opened; draw with a different color
+            fg = color(game.settings().colors().foreground().cave(), ANSI.WHITE_BRIGHT);
         }
+        game.textGraphics()
+                .setBackgroundColor(game.settings().colors().background().terrain(t, ANSI.BLACK));
+        game.textGraphics().setForegroundColor(fg);
         game.textGraphics().setCharacter(screenCol, screenRow, c);
     }
 

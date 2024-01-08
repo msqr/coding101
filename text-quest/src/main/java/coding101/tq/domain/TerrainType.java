@@ -7,40 +7,46 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Enumeration of terrain types.
  */
 public enum TerrainType {
-    Empty(TerrainType.EMPTY),
+    Cave(TerrainType.CAVE),
 
-    Mountain(TerrainType.MOUNTAIN),
+    Chest(TerrainType.CHEST),
+
+    Empty(TerrainType.EMPTY),
 
     Forest(TerrainType.FOREST),
 
     Grass(TerrainType.GRASS),
 
-    Water(TerrainType.WATER),
-
     Lava(TerrainType.LAVA),
 
-    Cave(TerrainType.CAVE),
+    Mountain(TerrainType.MOUNTAIN),
+
+    Sand(TerrainType.SAND),
+
+    Ship(TerrainType.SHIP),
 
     Town(TerrainType.TOWN),
-
-    Chest(TerrainType.CHEST),
 
     WallHorizontal(TerrainType.WALL_HORIZONTAL),
 
     WallVertical(TerrainType.WALL_VERTICAL),
 
     WallCorner(TerrainType.WALL_CORNER),
+
+    Water(TerrainType.WATER),
     ;
 
+    public static final char CAVE = 'O';
+    public static final char CHEST = '%';
     public static final char EMPTY = ' ';
-    public static final char MOUNTAIN = 'A';
     public static final char FOREST = '^';
     public static final char GRASS = '.';
-    public static final char WATER = '~';
     public static final char LAVA = '=';
-    public static final char CAVE = 'O';
+    public static final char MOUNTAIN = 'A';
+    public static final char SAND = ',';
+    public static final char SHIP = '&';
     public static final char TOWN = '*';
-    public static final char CHEST = '%';
+    public static final char WATER = '~';
 
     public static final char WALL_VERTICAL = '|';
     public static final char WALL_HORIZONTAL = '-';
@@ -73,17 +79,19 @@ public enum TerrainType {
     @JsonCreator
     public static final TerrainType forKey(char key) {
         return switch (key) {
-            case MOUNTAIN -> Mountain;
+            case CAVE -> Cave;
+            case CHEST -> Chest;
             case FOREST -> Forest;
             case GRASS -> Grass;
-            case WATER -> Water;
             case LAVA -> Lava;
-            case CAVE -> Cave;
+            case MOUNTAIN -> Mountain;
+            case SAND -> Sand;
+            case SHIP -> Ship;
             case TOWN -> Town;
-            case CHEST -> Chest;
             case WALL_CORNER -> WallCorner;
             case WALL_HORIZONTAL -> WallHorizontal;
             case WALL_VERTICAL -> WallVertical;
+            case WATER -> Water;
             default -> Empty;
         };
     }

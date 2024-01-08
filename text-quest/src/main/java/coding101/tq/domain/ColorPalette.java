@@ -16,14 +16,16 @@ public record ColorPalette(
         String healthPartial,
         String player,
         String cave,
+        String chest,
         String forest,
         String grass,
         String lava,
         String mountain,
+        String sand,
+        String ship,
         String town,
-        String water,
         String wall,
-        String chest) {
+        String water) {
 
     /**
      * A Vim-compatible terminal color mapping of lower-case names to associated
@@ -105,6 +107,8 @@ public record ColorPalette(
             case Grass -> color(grass(), defaultColor);
             case Lava -> color(lava(), defaultColor);
             case Mountain -> color(mountain(), defaultColor);
+            case Sand -> color(sand(), defaultColor);
+            case Ship -> color(ship(), defaultColor);
             case Town -> color(town(), defaultColor);
             case WallCorner, WallHorizontal, WallVertical -> color(wall(), defaultColor);
             case Water -> color(water(), defaultColor);

@@ -39,16 +39,17 @@ The map is composed of the following symbols:
 
 | Symbol | Description |
 |:-------|:------------|
-| `@`    | player |
-| `A`    | mountain |
-| `~`    | water |
-| `.`    | grass |
-| `^`    | forest |
-| `=`    | lava |
-| `*`    | town |
 | `O`    | cave |
 | `%`    | chest |
+| `@`    | player |
+| `^`    | forest |
+| `.`    | grass |
+| `=`    | lava |
+| `A`    | mountain |
+| `,`    | sand |
 | `&`    | ship |
+| `*`    | town |
+| `~`    | water |
 
 # Assumptions
 

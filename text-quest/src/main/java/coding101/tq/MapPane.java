@@ -120,6 +120,16 @@ public final class MapPane implements Pane {
         } else if (c == TerrainType.CHEST && game.player().hasInteracted(game.map(), x, y)) {
             // this chest has been opened; draw with a different color
             fg = color(game.settings().colors().foreground().cave(), ANSI.WHITE_BRIGHT);
+        } else if (c == TerrainType.SHIP && !game.player().vehicleLocatedAt(game.map(), x, y)) {
+            // ship no longer at this spot, draw water instead
+            c = TerrainType.WATER;
+            bg = game.settings().colors().background().terrain(TerrainType.Water, ANSI.BLACK);
+            fg = game.settings().colors().foreground().terrain(TerrainType.Water, ANSI.WHITE_BRIGHT);
+        } else if (c == TerrainType.WATER && game.player().vehicleLocatedAt(game.map(), x, y)) {
+            // ship is at this spot, draw ship instead
+            c = TerrainType.SHIP;
+            bg = game.settings().colors().background().terrain(TerrainType.Ship, ANSI.BLACK);
+            fg = game.settings().colors().foreground().terrain(TerrainType.Ship, ANSI.WHITE_BRIGHT);
         }
         game.textGraphics().setBackgroundColor(bg);
         game.textGraphics().setForegroundColor(fg);

@@ -1,10 +1,11 @@
 # Size: 100x100
 #
-#   A mountain        * town
-#   ~ water           O cave
-#   . grass
+#   A mountain        O cave
+#   ~ water           & ship
+#   . grass           * town
 #   ^ forest
 #   = lava
+#   , sand
 #
 #- start: 9,4
 #
@@ -14,11 +15,11 @@ AAAA~~~~.....^^^^^AAAAAAAAAOAAAA~~~~~~~~~~^^^AAAAAAA
 AA~~~~~~~.......^^^AAAAAA~~~~~~~~AAAAAAAAAAA~~
 A~~~~~~~~~~......^^AAAAA~~~~AAA~~~AAAAAAAAAAA
 A~~~~~~~*........^^^AA^~~~AAAAAAA~~~~~AAAAA
-AA~~~~~~~~~~....^^^^^^^~~~AAAAAAAAAAA~~AAAA
+AA~~~~~~&~~~....^^^^^^^~~~AAAAAAAAAAA~~AAAA
 AAA~~~~~~~......^^^^^^~~~AAAAAAAAAAAAA~~AAA
-AA~~~~~......^^^^^^^^~~~~AAAAAAAAAAAAAA~~AA
-A~~~~~~.....^^^^^~~~~~~AAAAAAAOAAAAAAAAA~AA
-A~~~~~~~~.~~~~~~~~~~AAAAAAAAAA==AAAAAAAA~AA
+AA~~~~~,,....^^^^^^^^~~~~AAAAAAAAAAAAAA~~AA
+A~~~~~~,,,,,^^^^^~~~~~~AAAAAAAOAAAAAAAAA~AA
+A~~~~~~~~,~~~~~~~~~~AAAAAAAAAA==AAAAAAAA~AA
 A~~~~~~~~~~~~~~~~~AAAAAAAAAAAAA==AAAAAAA~AA
 A~~~~~~~~~~~~~~~~AAAAAAAAAAAAAAA====AAAA~~A
 AA~~~~~~~~~~~~~.AAAAAAAAAAAAAAAAAA=======~A

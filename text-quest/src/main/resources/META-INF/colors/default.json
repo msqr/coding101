@@ -11,9 +11,11 @@
 		"grass":         "#55FF55",
 		"lava":          "#A90100",
 		"mountain":      "#999999",
+		"sand":          "#C79361",
+		"ship":          "#C79361",
 		"town":          "#FEFF55",
-		"water":         "#0000AA",
-		"wall":          "Black"
+		"wall":          "Black",
+		"water":         "#0000AA"
 	},
 	"foreground": {
 		"uiText":        "White",
@@ -27,8 +29,10 @@
 		"grass":         "#04AA00",
 		"lava":          "#FF5555",
 		"mountain":      "#FFFFFF",
+		"sand":          "#EFB219",
+		"ship":          "#000000",
 		"town":          "#AA5500",
-		"water":         "#5655FF",
-		"wall":          "DarkGray"
+		"wall":          "DarkGray",
+		"water":         "#5655FF"
 	}
 }

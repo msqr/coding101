@@ -82,7 +82,7 @@ public class HealthPane implements Pane {
 
         // draw blanks to "erase" any lost hearts
         for (int row = startX + full + (partial > 0 ? 1 : 0),
-                        max = startX + Player.MAX_HEALTH / PLAYER_HEALTH_HEART_VALUE;
+                        max = startX + Player.MAX_POSSIBLE_HEALTH / PLAYER_HEALTH_HEART_VALUE;
                 row < max;
                 row++) {
             game.textGraphics().setCharacter(row, y, ' ');

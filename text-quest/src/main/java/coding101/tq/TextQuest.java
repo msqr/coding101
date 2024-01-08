@@ -10,6 +10,7 @@ import coding101.tq.util.TerrainMapBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
@@ -37,6 +38,8 @@ public class TextQuest {
     private static int STATUS_PANE_HEIGHT = 1;
 
     private static int MESSAGE_CLEAR_DELAY = 2;
+
+    private static final int SHIP_COST = 100;
 
     private static char INTERACT_KEY = ' ';
     private static char SAVE_KEY = 's';
@@ -155,7 +158,7 @@ public class TextQuest {
             } else if (keyType == KeyType.ArrowDown) {
                 newY += 1;
             }
-            if (newX != player.getX() || newY != player.getY() && activeMap.canPlayerMoveTo(newX, newY)) {
+            if ((newX != player.getX() || newY != player.getY()) && player.canMoveTo(activeMap, newX, newY)) {
                 // move player
                 if (newX >= 0 && newY >= 0 && newX < activeMap.width() && newY < activeMap.height()) {
                     ui.map().movePlayer(newX, newY);
@@ -172,6 +175,7 @@ public class TextQuest {
                     switch (t) {
                         case Cave -> interactWithCave();
                         case Chest -> interactWithChest();
+                        case Ship, Water -> interactWithShip();
                         default -> {
                             // nothing to do
                         }
@@ -215,6 +219,8 @@ public class TextQuest {
             int coinsFound = 0;
             if (coinsFound > 0) {
                 message = MessageFormat.format(bundle.getString("chest.coinsAcquired"), coinsFound);
+                player.addCoins(coinsFound);
+                ui.info().draw();
             } else {
                 message = bundle.getString("chest.empty");
             }
@@ -226,6 +232,53 @@ public class TextQuest {
             ui.status().drawMessage(message, MESSAGE_CLEAR_DELAY);
         }
         screen.refresh();
+    }
+
+    private void interactWithShip() throws IOException {
+        String message = null; // message to show the outcome of interacting with the chest
+        int clearDelay = MESSAGE_CLEAR_DELAY;
+        if (player.isOnboard()) {
+            // disembark!
+            ui.status().drawMessage(bundle.getString("ship.askDisembark"), -1);
+            screen.refresh();
+            if (readYesNo()) {
+                player.setOnboard(false);
+                ui.status().drawMessage(bundle.getString("ship.disembarked"), MESSAGE_CLEAR_DELAY);
+            }
+            screen.refresh();
+        } else {
+            if (player.getCoins() < SHIP_COST) {
+                message = bundle.getString("ship.canNotAfford");
+                clearDelay = MESSAGE_CLEAR_DELAY * 3;
+            } else {
+                // ask if player wants to hire the ship
+                message = MessageFormat.format(bundle.getString("ship.askHire"), SHIP_COST);
+                clearDelay = -1;
+            }
+            ui.status().drawMessage(message, clearDelay);
+            screen.refresh();
+            if (clearDelay < 0) {
+                if (readYesNo()) {
+                    message = bundle.getString("ship.hired");
+                    player.setOnboard(true);
+                    player.deductCoins(SHIP_COST);
+                } else {
+                    message = bundle.getString("ship.hireDeclined");
+                }
+                ui.status().drawMessage(message, MESSAGE_CLEAR_DELAY);
+                screen.refresh();
+            }
+        }
+    }
+
+    private boolean readYesNo() throws IOException {
+        KeyStroke keyStroke = screen.readInput();
+        KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
+        if (keyType == KeyType.Character
+                && Character.toLowerCase(keyStroke.getCharacter().charValue()) == INTERACT_KEY) {
+            return true;
+        }
+        return false;
     }
 
     private TerrainMap loadChildMap(String mapName) {
@@ -259,6 +312,7 @@ public class TextQuest {
             ObjectMapper mapper = new ObjectMapper();
             mapper.setSerializationInclusion(Include.NON_NULL);
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
             // load color scheme
             String colorScheme = "default"; // TODO support command-line switch

@@ -25,10 +25,13 @@ public class TerrainMap {
     public static final String START_META = "start";
 
     private final String name;
-    private final TerrainType[][] terrain;
     private final Map<String, String> metadata;
-    private final int width;
-    private final int height;
+
+    // following NOT final to support changes via modifyAt()... can happen after map
+    // has expanded but save file was in old (smaller) map
+    private int width;
+    private int height;
+    private TerrainType[][] terrain;
 
     /**
      * Constructor.
@@ -157,8 +160,21 @@ public class TerrainMap {
      * @returns {@code true} if the terrain was changed
      */
     public final boolean modifyAt(int x, int y, TerrainType type) {
-        if (x >= width || y >= height) {
-            return false;
+        if (y >= height || x >= width) {
+            // expand rows or width with copy to new 2D array
+            final int newWidth = Math.max(x + 1, width);
+            TerrainType[][] newTerrain = new TerrainType[y + 1][];
+            for (int row = 0, maxRow = terrain.length; row < maxRow; row++) {
+                TerrainType[] newRow = new TerrainType[newWidth];
+                System.arraycopy(terrain[row], 0, newRow, 0, terrain[row].length);
+                newTerrain[row] = newRow;
+            }
+            for (int row = terrain.length, maxRow = y + 1; row < maxRow; row++) {
+                newTerrain[row] = new TerrainType[newWidth];
+            }
+            terrain = newTerrain;
+            width = newWidth;
+            height = y + 1;
         }
         if (terrain[y][x] != type) {
             terrain[y][x] = type;

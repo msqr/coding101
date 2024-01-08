@@ -78,20 +78,17 @@ public final class MapPane implements Pane {
 
         final int newStartX = (newX / paneWidth) * paneWidth;
         final int newStartY = (newY / paneHeight) * paneHeight;
+
+        game.player().moveTo(game.map(), newX, newY);
+
         if (newStartX != startX || newStartY != startY) {
             // redraw entire map
             drawMapForPoint(game.map(), newX, newY);
         } else {
-            TerrainType t =
-                    game.map().terrainAt(game.player().getX(), game.player().getY());
-            drawTerrain(
-                    game.player().getX(),
-                    game.player().getY(),
-                    game.player().getX() - startX + paneLeft,
-                    game.player().getY() - startY + paneTop,
-                    t);
+            game.map().walkSurrounding(newX, newY, (col, row, t) -> {
+                drawTerrain(col, row, col - startX + paneLeft, row - startY + paneTop, t);
+            });
         }
-        game.player().moveTo(game.map(), newX, newY);
         drawPlayer(game.player());
     }
 
@@ -108,16 +105,23 @@ public final class MapPane implements Pane {
     }
 
     private void drawTerrain(int x, int y, int screenCol, int screenRow, TerrainType t) {
-        TextColor fg = game.settings().colors().foreground().terrain(t, ANSI.WHITE_BRIGHT);
+        if (screenCol < left() || screenCol > right() || screenRow < top() || screenRow > bottom()) {
+            return;
+        }
+        final boolean visited = game.player().hasVisitedNear(game.map(), x, y);
         char c = t != null ? t.getKey() : TerrainType.EMPTY;
-        if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
+        TextColor bg = game.settings().colors().background().terrain(t, ANSI.BLACK);
+        TextColor fg = game.settings().colors().foreground().terrain(t, ANSI.WHITE_BRIGHT);
+        if (!visited) {
+            bg = ANSI.BLACK;
+            c = TerrainType.EMPTY;
+        } else if (c == TerrainType.WALL_CORNER || c == TerrainType.WALL_HORIZONTAL || c == TerrainType.WALL_VERTICAL) {
             c = Symbols.BLOCK_SOLID;
         } else if (c == TerrainType.CHEST && game.player().hasInteracted(game.map(), x, y)) {
             // this chest has been opened; draw with a different color
             fg = color(game.settings().colors().foreground().cave(), ANSI.WHITE_BRIGHT);
         }
-        game.textGraphics()
-                .setBackgroundColor(game.settings().colors().background().terrain(t, ANSI.BLACK));
+        game.textGraphics().setBackgroundColor(bg);
         game.textGraphics().setForegroundColor(fg);
         game.textGraphics().setCharacter(screenCol, screenRow, c);
     }

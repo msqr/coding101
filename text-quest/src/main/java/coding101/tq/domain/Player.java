@@ -163,6 +163,26 @@ public class Player {
     }
 
     /**
+     * Test if a specific map coordinate has been visited "near by" before.
+     *
+     * @param map the map
+     * @param x   the x coordinate
+     * @param y   the y coordinate
+     * @return {@code true} if the coordinate has been visited before
+     */
+    public boolean hasVisitedNear(TerrainMap map, int x, int y) {
+        TerrainMap visited = visitedMaps.get(map.getName());
+        for (int row = Math.max(0, y - 1), maxRow = Math.min(visited.height() - 1, y + 1); row <= maxRow; row++) {
+            for (int col = Math.max(0, x - 1), maxCol = Math.min(visited.width() - 1, x + 1); col <= maxCol; col++) {
+                if (visited.terrainAt(col, row) == TerrainType.Town) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get the visited map data.
      *
      * Each {@link TerrainMap} represents terrain visited by the player: all

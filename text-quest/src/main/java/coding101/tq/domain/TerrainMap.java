@@ -142,7 +142,7 @@ public class TerrainMap {
      *         {@code y} are out of bounds
      */
     public final TerrainType terrainAt(int x, int y) {
-        if (x >= width || y >= height) {
+        if (x >= width || y >= height || x < 0 || y < 0) {
             return TerrainType.Empty;
         }
         return terrain[y][x];
@@ -207,6 +207,26 @@ public class TerrainMap {
         int maxRow = y + height;
         for (int row = y; row < maxRow; row++) {
             for (int col = x; col < maxCol; col++) {
+                TerrainType[] r = row < terrain.length ? terrain[row] : null;
+                TerrainType t = r != null && col < r.length ? r[col] : null;
+                out.accept(col, row, t);
+            }
+        }
+    }
+
+    /**
+     * Walk the area immediately surrounding a point, skipping the point itself.
+     *
+     * @param x   the x origin
+     * @param y   the y origin
+     * @param out the destination
+     */
+    public void walkSurrounding(int x, int y, TerrainConsumer out) {
+        for (int row = Math.max(0, y - 1), maxRow = Math.min(height - 1, y + 1); row <= maxRow; row++) {
+            for (int col = Math.max(0, x - 1), maxCol = Math.min(width - 1, x + 1); col <= maxCol; col++) {
+                if (col == x && row == y) {
+                    continue;
+                }
                 TerrainType[] r = row < terrain.length ? terrain[row] : null;
                 TerrainType t = r != null && col < r.length ? r[col] : null;
                 out.accept(col, row, t);

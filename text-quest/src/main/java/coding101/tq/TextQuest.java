@@ -157,7 +157,7 @@ public class TextQuest {
             }
             if (newX != player.getX() || newY != player.getY() && activeMap.canPlayerMoveTo(newX, newY)) {
                 // move player
-                if (newX >= 0 && newY >= 0) {
+                if (newX >= 0 && newY >= 0 && newX < activeMap.width() && newY < activeMap.height()) {
                     ui.map().movePlayer(newX, newY);
                     screen.refresh();
                 }

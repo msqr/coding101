@@ -4,6 +4,7 @@
 .settings
 .gradle
 *.swp
+*.tqsave
 .vscode
 
 bin

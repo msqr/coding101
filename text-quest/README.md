@@ -44,7 +44,9 @@ The map is composed of the following symbols:
 | `@`    | player |
 | `^`    | forest |
 | `.`    | grass |
+| `m`    | hill |
 | `=`    | lava |
+| `"`    | lava rock |
 | `A`    | mountain |
 | `,`    | sand |
 | `&`    | ship |

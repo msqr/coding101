@@ -408,20 +408,21 @@ public class Player {
     /**
      * Test if a player can move to a given coordinate.
      *
-     * @param activeMap the map to test
-     * @param x         the x coordinate
-     * @param y         the y coordinate
+     * @param map the map to test
+     * @param x   the x coordinate
+     * @param y   the y coordinate
      * @return {@literal true} if the player is allowed to move to the coordinate
      */
-    public boolean canMoveTo(TerrainMap activeMap, int x, int y) {
+    public boolean canMoveTo(TerrainMap map, int x, int y) {
+        // grab the player's current position and save to local constants
         final int currX = this.x;
         final int currY = this.y;
 
         // get terrain at the current position so we tell if they are on a ship
-        final TerrainType currTerrain = activeMap.terrainAt(currX, currY);
+        final TerrainType currTerrain = map.terrainAt(currX, currY);
 
         // get terrain at the desired position so we can validate it is OK to move
-        final TerrainType newTerrain = activeMap.terrainAt(x, y);
+        final TerrainType newTerrain = map.terrainAt(x, y);
 
         // test for on board a ship
         if (onboard && (currTerrain == TerrainType.Ship || currTerrain == TerrainType.Water)) {

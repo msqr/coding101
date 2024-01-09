@@ -83,3 +83,157 @@ BUILD SUCCESSFUL in 2s
 $ java -jar build/libs/text-quest-all.jar
 ```
 
+# Goal 1: fix movement
+
+At the moment the player can move across any terrain. A player should not be able to move onto
+**Mountain** or **Water** terrain, however. To fix this, complete the `canMoveTo(map, x, y)` method
+in the [Player](./src/main/java/coding101/tq/domain/Player.java) class. Currently the method looks
+like this:
+
+```java
+/**
+ * Test if a player can move to a given coordinate.
+ *
+ * @param map the map to test
+ * @param x   the x coordinate
+ * @param y   the y coordinate
+ * @return {@literal true} if the player is allowed to move to the coordinate
+ */
+public boolean canMoveTo(TerrainMap map, int x, int y) {
+    // grab the player's current position and save to local constants
+    final int currX = this.x;
+    final int currY = this.y;
+
+    // get terrain at the current position so we tell if they are on a ship
+    final TerrainType currTerrain = map.terrainAt(currX, currY);
+
+    // get terrain at the desired position so we can validate it is OK to move
+    final TerrainType newTerrain = map.terrainAt(x, y);
+
+    // test for on board a ship
+    if (onboard && (currTerrain == TerrainType.Ship || currTerrain == TerrainType.Water)) {
+        // on a ship! can only travel to another water
+        return newTerrain == TerrainType.Water;
+    }
+    // TODO: finish validation that player can move to specified coordinate
+    return true;
+}
+```
+
+> :point_up: **Note** the `// TODO` comment, which is where you should complete the implementation.
+> You **do not** need to worry too much about understanding the `if (onboard...){}` block before
+> that, just know that that handles the logic for movement when on board a ship.
+
+> :point_down: **Continue reading** the next sections to learn about the `TerrainMap`,
+> `TerrainType`, and `Player` classes you see in this method.
+
+## About the map and terrain
+
+A map in the game is modeled by the
+[`TerrainMap`](./src/main/java/coding101/tq/domain/TerrainMap.java) class, which has a `terrain`
+field that is a 2D arrayof [`TerrainType`](./src/main/java/coding101/tq/domain/TerrainType.java)
+enum values. The `TerrainType` enumeration models all possible terrain types, and also defines the
+text character used by that type:
+
+```java
+public enum TerrainType {
+
+    Cave(TerrainType.CAVE),
+
+    Chest(TerrainType.CHEST),
+
+    Empty(TerrainType.EMPTY),
+
+    Forest(TerrainType.FOREST),
+
+    Grass(TerrainType.GRASS),
+
+    // ... and so on 
+    ;
+
+    // here begins the text character constants for each terrain type:
+
+    public static final char CAVE = 'O';
+    public static final char CHEST = '%';
+    public static final char EMPTY = ' ';
+    public static final char FOREST = '^';
+    public static final char GRASS = '.';
+
+    // ... and so on
+}
+```
+You can think of the `char` type in Java as representing a single letter, or _character_. Thus the
+line:
+
+```java
+public static final char CAVE = 'O';
+```
+
+defines a constant named `CAVE` that is equal to the letter `O`.
+
+### Finding the type of terrain at a map coordinate
+
+The `TerrainMap` class will be populated with the map data read from a game map file. You may 
+have noticed the `canMoveTo(map, x, y)` method above called the `terrainAt(x, y)` method on
+the passed-in `map` object. That method will return the `TerrainType` at the given (x,y)
+coordinate in the map, so that is the method to use if you want to know what the terrain is
+at a given coordinate. That method looks like this:
+
+```java
+/**
+ * Get the terrain type at a specific coordinate.
+ *
+ * @param x the x coordinate
+ * @param y the y coordinate
+ * @return the terrain type, or {@link TerrainType#Empty} if {@code x} or
+ *         {@code y} are out of bounds
+ */
+public final TerrainType terrainAt(int x, int y) {
+    if (x >= width || y >= height || x < 0 || y < 0) {
+        return TerrainType.Empty;
+    }
+    return terrain[y][x];
+}
+```
+
+This code should look very familiar to you if you completed the [Tic Tac Toe](../tic-tac-toe/) project
+and you recall that the `terrain` field is a 2D array of enum values, just like how the `board` field
+in the [`TicTacToe`](../tic-tac-toe/src/main/java/coding101/ttt/TicTacToe.java) class was a 2D array
+of enum values.
+
+## About the player
+
+The player state is modeled by the [`Player`](./src/main/java/coding101/tq/domain/Player.java) class.
+This class has a lot of fields and methods already, but we can focus on just a couple of things at
+this point.
+
+### Player position
+
+The player's current position is stored on `x` and `y` `int` fields of the `Player` class:
+
+```java
+public class Player {
+
+    private int x;
+    private int y;
+
+}
+```
+
+When the `canMoveTo(map, x, y)` method is called, the player's `x` and `y` values represent the
+coordinate the player is **currently at**. That is why the `canMoveTo(map, x, y)` method grabs
+those and stores them in local constants:
+
+```java
+public boolean canMoveTo(TerrainMap map, int x, int y) {
+    // grab the player's current position and save to local constants
+    final int currX = this.x;
+    final int currY = this.y;  
+```
+
+> :point_up: Notice how `this.` is used to access the `x` and `y` fields of the player. That is
+> necessary here because the method defines `x` and `y` argument variables that represent the
+> **desired** position to **move to**, not the player's current position! That means while inside
+> this method, `x` and `y` refer to the argument values (the desired position); `this.x` and
+> `this.y` refer to the player's field values (the current position). Essentially the
+> argument variable names **override** or **mask** the class field names.

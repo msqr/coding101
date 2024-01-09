@@ -25,7 +25,7 @@ public class Player {
     private String activeMapName;
     private int x;
     private int y;
-    private boolean onboard;
+    private Coordinate onboard; // the map coordinate of the boarded vehicle
     private int coins;
     private Map<String, TerrainMap> visitedMaps = new HashMap<>(2);
     private Map<String, Set<Coordinate>> interactions = new HashMap<>(16);
@@ -80,7 +80,7 @@ public class Player {
      * @return {@code true} if visiting the coordinate for the first time
      */
     public boolean moveTo(TerrainMap map, int x, int y) {
-        if (onboard) {
+        if (onboard != null) {
             // update vehicle coordinate to match
             Map<Coordinate, Coordinate> mapVehicles = vehicles.get(map.getName());
             Coordinate vehicleOrigCoord = null;
@@ -184,35 +184,70 @@ public class Player {
      *
      * @return {@code true} if the player is on board a vehicle
      */
-    public boolean isOnboard() {
+    public boolean onboard() {
+        return onboard != null;
+    }
+
+    /**
+     * Get the origin coordinate of the vehicle currently on board.
+     *
+     * @return the origin coordinate of the boarded vehicle, or {@code null} if not
+     *         on board a vehicle
+     */
+    public Coordinate getOnboard() {
         return onboard;
     }
 
     /**
-     * Set the "on board" status.
+     * Set the origin coordinate of the vehicle currently on board.
      *
-     * @param onboard {@code true} if the player is on board a vehicle
+     * @param coord the origin coordinate of the boarded vehicle, or {@code null} if
+     *              not on board a vehicle
      */
-    public void setOnboard(boolean onboard) {
-        this.onboard = onboard;
+    public void setOnboard(Coordinate coord) {
+        this.onboard = coord;
+    }
 
+    /**
+     * Board the vehicle at the player's current location.
+     */
+    public void board() {
         final Coordinate coord = new Coordinate(x, y);
 
+        // have to consult vehicles data for moved ship locations
         Map<Coordinate, Coordinate> mapVehicles = vehicles.get(activeMapName);
 
-        if (onboard) {
-            // is this coordinate already in vehicles? If so, nothing else to do
-            if (mapVehicles != null && mapVehicles.containsValue(coord)) {
-                return;
+        // find the ship "origin": its original position encoded on the map
+        Coordinate shipOrigin = null;
+        if (mapVehicles != null) {
+            for (Entry<Coordinate, Coordinate> e : mapVehicles.entrySet()) {
+                Coordinate shipCoord = e.getValue();
+                if (shipCoord.equals(coord)) {
+                    // found the ship's current location
+                    shipOrigin = e.getKey();
+                    break;
+                }
             }
-
-            // need to add vehicle
-            if (mapVehicles == null) {
-                mapVehicles = new TreeMap<>();
-                vehicles.put(activeMapName, mapVehicles);
-            }
-            mapVehicles.put(coord, coord);
         }
+        if (shipOrigin == null) {
+            // origin must be current location
+            shipOrigin = coord;
+        }
+
+        this.onboard = shipOrigin;
+
+        if (mapVehicles == null) {
+            mapVehicles = new TreeMap<>();
+            vehicles.put(activeMapName, mapVehicles);
+        }
+        mapVehicles.put(shipOrigin, coord);
+    }
+
+    /**
+     * Disembark the currently boarded vehicle.
+     */
+    public void disembark() {
+        onboard = null;
     }
 
     /**
@@ -396,17 +431,21 @@ public class Player {
      */
     public boolean vehicleLocatedAt(TerrainMap map, int x, int y) {
         Map<Coordinate, Coordinate> mapVehicles = vehicles.get(map.getName());
+        boolean shipMoved = false;
         if (mapVehicles != null) {
             // search current vehicle locations for coordinate match
-            for (Coordinate coord : mapVehicles.values()) {
+            for (Entry<Coordinate, Coordinate> e : mapVehicles.entrySet()) {
+                Coordinate coord = e.getValue();
                 if (coord.x() == x && coord.y() == y) {
                     return true;
                 }
+                coord = e.getKey();
+                if (coord.x() == x && coord.y() == y) {
+                    shipMoved = true;
+                }
             }
-        } else {
-            return map.terrainAt(x, y) == TerrainType.Ship;
         }
-        return false;
+        return map.terrainAt(x, y) == TerrainType.Ship && !shipMoved;
     }
 
     /**
@@ -418,20 +457,13 @@ public class Player {
      * @return {@literal true} if the player is allowed to move to the coordinate
      */
     public boolean canMoveTo(TerrainMap map, int x, int y) {
-        // grab the player's current position and save to local constants
-        final int currX = this.x;
-        final int currY = this.y;
-
-        // get terrain at the current position so we tell if they are on a ship
-        final TerrainType currTerrain = map.terrainAt(currX, currY);
-
         // get terrain at the desired position so we can validate it is OK to move
         final TerrainType newTerrain = map.terrainAt(x, y);
 
         // test for on board a ship
-        if (onboard && (currTerrain == TerrainType.Ship || currTerrain == TerrainType.Water)) {
+        if (onboard()) {
             // on a ship! can only travel to another water
-            return newTerrain == TerrainType.Water;
+            return (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) && !vehicleLocatedAt(map, x, y);
         }
         // TODO: finish validation that player can move to specified coordinate
         return true;

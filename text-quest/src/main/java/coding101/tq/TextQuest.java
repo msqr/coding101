@@ -247,12 +247,12 @@ public class TextQuest {
     private void interactWithShip() throws IOException {
         String message = null; // message to show the outcome of interacting with the chest
         int clearDelay = MESSAGE_CLEAR_DELAY;
-        if (player.isOnboard()) {
+        if (player.onboard()) {
             // disembark!
             ui.status().drawMessage(bundle.getString("ship.askDisembark"), -1);
             screen.refresh();
             if (game.readYesNo()) {
-                player.setOnboard(false);
+                player.disembark();
                 ui.status().drawMessage(bundle.getString("ship.disembarked"), MESSAGE_CLEAR_DELAY);
             } else {
                 ui.status().drawMessage(null, -1);
@@ -272,7 +272,7 @@ public class TextQuest {
             if (clearDelay < 0) {
                 if (game.readYesNo()) {
                     message = bundle.getString("ship.hired");
-                    player.setOnboard(true);
+                    player.board();
                     player.deductCoins(SHIP_COST);
                 } else {
                     message = bundle.getString("ship.hireDeclined");

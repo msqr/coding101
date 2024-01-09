@@ -19,7 +19,10 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +31,12 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.regex.Matcher;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
  * Console based text adventure game.
@@ -302,12 +311,71 @@ public class TextQuest {
         screen.refresh();
     }
 
+    /** The starting coins CLI option. */
+    public static final char OPT_COINS = 'c';
+
+    /** The help CLI option. */
+    public static final char OPT_HELP = '?';
+
+    private static Options cliOptions() {
+        Options options = new Options();
+        options.addOption(Option.builder(String.valueOf(OPT_HELP))
+                .longOpt("help")
+                .desc("show usage information")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_COINS))
+                .longOpt("coins")
+                .hasArg()
+                .desc("starting number of coins")
+                .build());
+        return options;
+    }
+
+    private static void printHelp(Options options) {
+        HelpFormatter help = new HelpFormatter();
+        StringBuilder banner = new StringBuilder();
+        try (BufferedReader r = new BufferedReader(
+                new InputStreamReader(TextQuest.class.getResourceAsStream("banner.txt"), StandardCharsets.UTF_8))) {
+            String line = null;
+            while ((line = r.readLine()) != null) {
+                banner.append(line).append(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            // ignore and continue
+        }
+        help.printHelp("<options>", banner.toString(), options, null);
+    }
+
+    private static void printErrorAndExit(String msg) {
+        System.err.println(msg);
+        System.err.println("Pass --help for command line argument help.");
+        System.exit(1);
+    }
+
     public static void main(String[] args) {
+        // parse arguments
+        Options opts = cliOptions();
+        CommandLine cl = null;
+        try {
+            cl = DefaultParser.builder()
+                    .setStripLeadingAndTrailingQuotes(true)
+                    .build()
+                    .parse(opts, args);
+        } catch (ParseException e) {
+            System.err.println("Error parsing arguments: %s".formatted(e.getMessage()));
+            printHelp(opts);
+            System.exit(1);
+        }
+
+        if (cl.hasOption(OPT_HELP)) {
+            printHelp(opts);
+            System.exit(0);
+        }
+
         try (Terminal terminal = new DefaultTerminalFactory().createTerminal()) {
             TerminalSize screenSize = terminal.getTerminalSize();
             if (screenSize.getColumns() < 30 || screenSize.getRows() < 10) {
-                System.err.println("Terminal must be at least 30x10.");
-                System.exit(1);
+                printErrorAndExit("Terminal must be at least 30x10.");
             }
 
             // create JSON mapper
@@ -341,6 +409,17 @@ public class TextQuest {
             } else {
                 player = new Player();
                 player.moveTo(mainMap, mainMap.startingCoordinate());
+                if (cl.hasOption(OPT_COINS)) {
+                    try {
+                        int coins = Integer.parseInt(cl.getOptionValue(OPT_COINS));
+                        if (coins < 0) {
+                            throw new IllegalArgumentException();
+                        }
+                        player.setCoins(coins);
+                    } catch (Exception e) {
+                        printErrorAndExit("The --coins argument must be a number 0 or more.");
+                    }
+                }
             }
 
             // create text screen on top of our terminal

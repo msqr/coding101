@@ -123,8 +123,7 @@ public class TextQuest {
         public boolean readYesNo() throws IOException {
             KeyStroke keyStroke = screen.readInput();
             KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
-            if (keyType == KeyType.Character
-                    && Character.toLowerCase(keyStroke.getCharacter().charValue()) == INTERACT_KEY) {
+            if (keyType == KeyType.Enter) {
                 return true;
             }
             return false;
@@ -146,7 +145,7 @@ public class TextQuest {
     public void run() throws IOException {
         ui.draw();
         while (true) {
-            KeyStroke keyStroke = screen.pollInput();
+            KeyStroke keyStroke = screen.readInput();
             KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
             if (keyType == KeyType.Escape || keyType == KeyType.EOF) {
                 return;

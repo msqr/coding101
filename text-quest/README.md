@@ -76,19 +76,40 @@ java -jar build/libs/text-quest-all.jar
 You should see something like this:
 
 ```
+# build
 $ ../gradlew spotlessApply build
 
 BUILD SUCCESSFUL in 2s
 
+# run
 $ java -jar build/libs/text-quest-all.jar
+```
+
+## Command line arguments
+
+The game supports several command line arguments. You can pass `-h` or `--help` for all available
+options:
+
+```
+usage: <options>
+ _____            _    _____                    _
+|_   _|          | |  |  _  |                  | |
+  | |  ___ __  __| |_ | | | | _   _   ___  ___ | |_
+  | | / _ \\ \/ /| __|| | | || | | | / _ \/ __|| __|
+  | ||  __/ >  < | |_ \ \/' /| |_| ||  __/\__ \| |_
+  \_/ \___|/_/\_\ \__| \_/\_\ \__,_| \___||___/ \__|
+
+ -h,--help          show usage information
+ -c,--coins <arg>   starting number of coins
 ```
 
 # Goal 1: fix movement
 
 At the moment the player can move across any terrain. A player should not be able to move onto
-**Mountain** or **Water** terrain, however. To fix this, complete the `canMoveTo(map, x, y)` method
-in the [Player](./src/main/java/coding101/tq/domain/Player.java) class. Currently the method looks
-like this:
+**Mountain** or **Water** terrain, however. A player should be able to move onto a **Ship**, and
+then board that ship, and then move to any **Water** terrain. To fix this method, complete the
+`canMoveTo(map, x, y)` method in the [Player](./src/main/java/coding101/tq/domain/Player.java)
+class. Currently the method looks like this:
 
 ```java
 /**
@@ -100,20 +121,14 @@ like this:
  * @return {@literal true} if the player is allowed to move to the coordinate
  */
 public boolean canMoveTo(TerrainMap map, int x, int y) {
-    // grab the player's current position and save to local constants
-    final int currX = this.x;
-    final int currY = this.y;
-
-    // get terrain at the current position so we tell if they are on a ship
-    final TerrainType currTerrain = map.terrainAt(currX, currY);
-
     // get terrain at the desired position so we can validate it is OK to move
     final TerrainType newTerrain = map.terrainAt(x, y);
 
     // test for on board a ship
-    if (onboard && (currTerrain == TerrainType.Ship || currTerrain == TerrainType.Water)) {
+    if (onboard()) {
         // on a ship! can only travel to another water
-        return newTerrain == TerrainType.Water;
+        return (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
+            && !vehicleLocatedAt(map, x, y);
     }
     // TODO: finish validation that player can move to specified coordinate
     return true;
@@ -121,18 +136,48 @@ public boolean canMoveTo(TerrainMap map, int x, int y) {
 ```
 
 > :point_up: **Note** the `// TODO` comment, which is where you should complete the implementation.
-> You **do not** need to worry too much about understanding the `if (onboard...){}` block before
-> that, just know that that handles the logic for movement when on board a ship.
+> The `if (onboard()){}` block before that handles the logic for movement when on board a ship.
 
-> :point_down: **Continue reading** the next sections to learn about the `TerrainMap`,
+> :point_down: **Continue reading** the next sections to learn about ships and the `TerrainMap`,
 > `TerrainType`, and `Player` classes you see in this method.
 
 ## About the map and terrain
 
 A map in the game is modeled by the
 [`TerrainMap`](./src/main/java/coding101/tq/domain/TerrainMap.java) class, which has a `terrain`
-field that is a 2D arrayof [`TerrainType`](./src/main/java/coding101/tq/domain/TerrainType.java)
-enum values. The `TerrainType` enumeration models all possible terrain types, and also defines the
+field that is a 2D array of [`TerrainType`](./src/main/java/coding101/tq/domain/TerrainType.java)
+enum values. The **first** array dimension represents **rows** of map data and the **second**
+dimension represents **columns**. For example, imagine a 3x3 map:
+
+```
+~~^
+~.m
+,.A
+```
+
+We can visualise that as a 2D array with rows and columns, like this:
+
+```
+       0   1   2
+┌─────────────────┐
+│    ┌───────────┐│
+│ 0: │ ~ │ ~ │ ^ ││
+│    └───────────┘│
+├─────────────────┤
+│    ┌───────────┐│
+│ 1: │ ~ │ . │ m ││
+│    └───────────┘│
+├─────────────────┤
+│    ┌───────────┐│
+│ 2: │ , │ . │ A ││
+│    └───────────┘│
+└─────────────────┘
+```
+
+> :question: Using (x,y) coordinate notation where `x` is a column and `y` is a row, what coodinate
+> is Mountain (`A`)? What coordinate is Forrest (`^`)?
+
+The `TerrainType` enumeration models all possible terrain types, and also defines the
 text character used by that type:
 
 ```java
@@ -201,6 +246,48 @@ and you recall that the `terrain` field is a 2D array of enum values, just like 
 in the [`TicTacToe`](../tic-tac-toe/src/main/java/coding101/ttt/TicTacToe.java) class was a 2D array
 of enum values.
 
+> :question: Why is `terrain[y][x]` used and not `terrain[x][y]`? Does it matter? Refer 
+> [back](#about-the-map-and-terrain) for details.
+
+## About ships
+
+Ships are a special type of terrain in that they can by **boarded** and then moved by the player to
+any adjacent **Water** terrain. To board a ship, move onto a ship and type <kbd>Space</kbd> to
+board. Once boarded, the arrow keys move the player **along with the ship**. The `TerrainMap` data
+**does not change** to reflect the ship's updated location, however! Instead the updated ship
+locations are stored on the Player.
+
+> :bulb: Maintaining ship locations on `Player`, instead of modifying `TerrainMap`, makes sense if
+> you think of a ship postion as just another player game state attribute, like health and coins.
+
+> :question: If we did modify `TerrainMap` to keep track of ship locations, what impact would that
+> have on saving the game, and then reloading the game?
+
+Since the **map data does not change** as ships move around, calling `map.terrainAt(x,y)` will only
+return `Ship` at each ship's **starting coordinate on the map**. To really know if a map location is
+a ship you must use the `vehicleLocatedAt(map, x, y)` method in the
+[Player](./src/main/java/coding101/tq/domain/Player.java) class. That method will return `true` only
+on coordinates that hold a ship, even after the ship has moved.
+
+Take a look back at that `canMoveTo()` method that deals with ship movement:
+
+```java
+    if (onboard()) {
+        // on a ship! can only travel to another water
+        return (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
+            && !vehicleLocatedAt(map, x, y);
+    }
+```
+
+Notice the `&& !vehicleLocatedAt(map, x, y)` logic clause that is included. You could write
+the entire logic statement in plain language like:
+
+> While on board a ship, the player **CAN** move to (x, y) **IF** the original map terrain **IS**
+> Water **OR** Ship, **AND** a ship is not currently located there.
+
+> :question: Why is the `|| newTerrain == TerrainType.Ship` clause included in this logic,
+> when logically a ship can only move to Water terrain?
+
 ## About the player
 
 The player state is modeled by the [`Player`](./src/main/java/coding101/tq/domain/Player.java) class.
@@ -219,24 +306,6 @@ public class Player {
 
 }
 ```
-
-When the `canMoveTo(map, x, y)` method is called, the player's `x` and `y` values represent the
-coordinate the player is **currently at**. That is why the `canMoveTo(map, x, y)` method grabs
-those and stores them in local constants:
-
-```java
-public boolean canMoveTo(TerrainMap map, int x, int y) {
-    // grab the player's current position and save to local constants
-    final int currX = this.x;
-    final int currY = this.y;  
-```
-
-> :point_up: Notice how `this.` is used to access the `x` and `y` fields of the player. That is
-> necessary here because the method defines `x` and `y` argument variables that represent the
-> **desired** position to **move to**, not the player's current position! That means while inside
-> this method, `x` and `y` refer to the argument values (the desired position); `this.x` and
-> `this.y` refer to the player's field values (the current position). Essentially the
-> argument variable names **override** or **mask** the class field names.
 
 # Goal 2: player health and death by lava
 

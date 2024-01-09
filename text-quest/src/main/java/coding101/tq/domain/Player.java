@@ -270,9 +270,13 @@ public class Player {
      */
     public boolean visited(TerrainMap map, int x, int y) {
         assert map != null;
+        // TODO: walking on lava should decrease player's health
+
+        // update the visited state of this coordinate
         TerrainMap visited = visitedMaps.computeIfAbsent(
                 map.getName(), name -> TerrainMapBuilder.nullMap(name, map.width(), map.height()));
-        return visited.modifyAt(x, y, TerrainType.Town);
+        boolean result = visited.modifyAt(x, y, TerrainType.Town);
+        return result;
     }
 
     /**

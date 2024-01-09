@@ -19,7 +19,9 @@ public record ColorPalette(
         String chest,
         String forest,
         String grass,
+        String hill,
         String lava,
+        String lavaRock,
         String mountain,
         String sand,
         String ship,
@@ -105,7 +107,9 @@ public record ColorPalette(
             case Empty -> defaultColor;
             case Forest -> color(forest(), defaultColor);
             case Grass -> color(grass(), defaultColor);
+            case Hill -> color(hill(), defaultColor);
             case Lava -> color(lava(), defaultColor);
+            case LavaRock -> color(lavaRock(), defaultColor);
             case Mountain -> color(mountain(), defaultColor);
             case Sand -> color(sand(), defaultColor);
             case Ship -> color(ship(), defaultColor);

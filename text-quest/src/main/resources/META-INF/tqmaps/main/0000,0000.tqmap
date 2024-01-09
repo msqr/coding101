@@ -1,25 +1,35 @@
 # Size: 100x100
 #
 #   A mountain        O cave
-#   ~ water           & ship
-#   . grass           * town
+#   m hill            & ship
+#   ~ water           * town
+#   , sand
+#   . grass
 #   ^ forest
 #   = lava
-#   , sand
+#   " lava rock
 #
 #- start: 9,4
 #
 #        1         2         3         4         5         6         7         8         9         C
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-AAAA~~~~.....^^^^^AAAAAAAAAOAAAA~~~~~~~~~~^^^AAAAAAA
-AA~~~~~~~.......^^^AAAAAA~~~~~~~~AAAAAAAAAAA~~
-A~~~~~~~~~~......^^AAAAA~~~~AAA~~~AAAAAAAAAAA
-A~~~~~~~*........^^^AA^~~~AAAAAAA~~~~~AAAAA
-AA~~~~~~&~~~....^^^^^^^~~~AAAAAAAAAAA~~AAAA
-AAA~~~~~~~......^^^^^^~~~AAAAAAAAAAAAA~~AAA
-AA~~~~~,,....^^^^^^^^~~~~AAAAAAAAAAAAAA~~AA
-A~~~~~~,,,,,^^^^^~~~~~~AAAAAAAOAAAAAAAAA~AA
-A~~~~~~~~,~~~~~~~~~~AAAAAAAAAA==AAAAAAAA~AA
-A~~~~~~~~~~~~~~~~~AAAAAAAAAAAAA==AAAAAAA~AA
-A~~~~~~~~~~~~~~~~AAAAAAAAAAAAAAA====AAAA~~A
-AA~~~~~~~~~~~~~.AAAAAAAAAAAAAAAAAA=======~A
+AAAA~~~~.....^^^^^AAAAAAAAAOAAAA~~~~~~~~~~^^^AAAAAAA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AA~~~~~~~.......^^^AAAAAA~~~~~~~~AAAAAAAAAAA~~~~~~~~~~""""""""mm^^~~~~~~~~~~~~~~~,,,,,,,,,,,,,~~~~~~
+A~~~~~~~~~~......^^AAAAA~~~~AAA~~~AAAAAAAAA"""""""""======AAA""mmm^^^^..~~~~~,,,,,,,.......O,,,~~~~~
+A~~~~~~~*........^^^AA^~~~AAAAAAA~~~~~AAAA""""""""====AAA=====""mmm^^^^..~~~~,,,,,...........,,~~~~~
+AA~~~~~~&~~~....^^^^^^^~~~AAAAAAAAAAA~~""""""""==="""AAA==AAA==""mmm^^^..~~~~~,,.....*.....,,,~~~~~~
+AAA~~~~~~~......^^^^^^~~~AAAAAAAAAAAAA~~""""""""""""""A==AAAAA"=Ommm^^....~~~~~,..........,,~~~~~~~~
+AA~~~~~,,....^^^^^^^^~~~~AAAAAAAAAAAAAA~~AAAmmmmmmmm"""AAAAAA"""mmm^^^^^.~~~~~~~......~~~~~~~~~,~~~~
+A~~~~~~,,,,,^^^^^~~~~~~AAAAAAAOAAAAAAAAA~AAAAAmmmmmmmmmmmAAmmmmmmm^^^^.....~~~~~~~~~~~~~~~~~~~~~~~~~
+A~~~~~~~~,~~~~~~~~~~AAAAAAAAAA==AAAAAAAA~AAAAAAAmmmmmmmmmmmmmmmmm^^^^....~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A~~~~~~~~~~~~~~~~~AAAAAAAAAAAAA==AAAAAAA~AAAAAmmmmmmmmmmmmmmmmm^^^^....~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A~~~~~~~~~~~~~~~~AAAAAAAAAAAAAAA====AAAA~~AAmmmmmmmmmmmmmm^^^^^^^.....~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AA~~~~~~~~~~~~~.AAAAAAAAAAAAAAAAAA=======~Ammmmmmmmmm^^^^^^^^^......~~~~~~~~~~~~~~~~~~~~~~~,,,,,~~~~
+AAA~~~~~~~~~~~...mmmAAAAAAAAAAAAAAAAAAAA~~mmmmmmmm^^^^^^^^^^^^^....~~~~~~~~~~~~~~~~~~~~~~,,,,,~~~~~~
+AAAA~~~~~~.....mmmmmmmmAAAAAAAAAAAAA~~~~~~~~~~~^^^^^^^^^^^^^^^......~~~~~~~~~~~~~,,,,,,,,,,O,,~~~~~~
+AAAAAA,,,,......mmmmmmmmmmAAAAAA~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^......~~~~~~~~~,,,,,,,,,,.....,,~~~~~
+AAAAAAAOAAAAmmmmmmmmmmmmAAAAA*mmmm~~~~~~~~~~~~~^^^^^^^^^^^^^........~~~~~~~~~,,,,,,,........,,~~~~~~
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmmm~~~~~~~~~~^^^^^^^^^^^.............~~~~~~~~~,,,,.......,,,~~~~~~~~
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmmmmmmmm~~~~~^^^^^^^................~~~~~~~~~~~~,,,,,,,,,,~~~~~~~~~~~
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmmmmmmmmm~^^^^^^................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmmmmmm~~^^^^.....................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

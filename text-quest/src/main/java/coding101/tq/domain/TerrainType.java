@@ -17,7 +17,11 @@ public enum TerrainType {
 
     Grass(TerrainType.GRASS),
 
+    Hill(TerrainType.HILL),
+
     Lava(TerrainType.LAVA),
+
+    LavaRock(TerrainType.LAVA_ROCK),
 
     Mountain(TerrainType.MOUNTAIN),
 
@@ -41,7 +45,9 @@ public enum TerrainType {
     public static final char EMPTY = ' ';
     public static final char FOREST = '^';
     public static final char GRASS = '.';
+    public static final char HILL = 'm';
     public static final char LAVA = '=';
+    public static final char LAVA_ROCK = '"';
     public static final char MOUNTAIN = 'A';
     public static final char SAND = ',';
     public static final char SHIP = '&';
@@ -83,7 +89,9 @@ public enum TerrainType {
             case CHEST -> Chest;
             case FOREST -> Forest;
             case GRASS -> Grass;
+            case HILL -> Hill;
             case LAVA -> Lava;
+            case LAVA_ROCK -> LavaRock;
             case MOUNTAIN -> Mountain;
             case SAND -> Sand;
             case SHIP -> Ship;

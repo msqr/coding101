@@ -315,7 +315,7 @@ public class TextQuest {
     public static final char OPT_COINS = 'c';
 
     /** The help CLI option. */
-    public static final char OPT_HELP = '?';
+    public static final char OPT_HELP = 'h';
 
     private static Options cliOptions() {
         Options options = new Options();

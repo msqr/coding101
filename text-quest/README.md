@@ -319,25 +319,55 @@ A player has a "health" status that is modeled as an integer on the [`Player`](.
 ```java
 public class Player {
 
-    /** The default (starting) health value. */
-    public static final int DEFAULT_HEALTH = 30;
+    private GameConfiguration config;
+    private int health;
+    private int maxHealth;
 
-    /** The maximum possible health value. */
-    public static final int MAX_POSSIBLE_HEALTH = 100;
-
-    private int health = DEFAULT_HEALTH;
-    private int maxHealth = DEFAULT_HEALTH;
+    /**
+     * Constructor.
+     *
+     * @param config the game configuration
+     */
+    public Player(GameConfiguration config) {
+        super();
+        this.config = Objects.requireNonNull(config);
+        this.health = config.initialHealth();
+        this.maxHealth = config.initialMaxHealth();
+    }
 
 }
 ```
 
-The `DEFAULT_HEALTH` constant defines a player's starting health (30), and the `MAX_POSSIBLE_HEALTH`
-constant defines the maximum possible health value as 100. The `health` field is used to keep track
-of the player's current health, and you can see it is initialized to 30 (`DEFAULT_HEALTH`). The
-`maxHealth` field is used to keep track of the maximum health the player can currently have, which
-also starts at 30. As a player's experience grows in the game, the `maxHealth` can be increased, so
-the player's health _capacity_ grows stronger and the player can take more damage as they fight more
-powerful enemies.
+The `health` field is used to keep track of the player's current health. The `maxHealth` field is
+used to keep track of the maximum health the player can currently have. As a player's experience
+grows in the game, the `maxHealth` can be increased, so the player's health _capacity_ grows
+stronger and the player can take more damage as they fight more powerful enemies.
+
+The `GameConfiguration` class defines several "knobs" that can be tweaked via command line arguments.
+There are a few health-related properties:
+
+```java
+public record GameConfiguration(
+        int initialCoins,
+        int initialHealth,
+        int initialMaxHealth,
+        int maxPossibleHealth,
+        int lavaHealthDamage) {
+}
+```
+
+The `initialHealth` property defines the player's starting `health` (this defaults to 30), and the
+`initialMaxHealth` property the player's starting `maxHealth` (this defaults to 30). The
+`maxPossibleHealth` defines  defines the maximum possible health value that can be achieved in the
+game (this defaults to 100).
+
+You can see that the `Player` constructor initializes the `health` and `maxHealth` from the 
+configuration:
+
+```java
+this.health = config.initialHealth();
+this.maxHealth = config.initialMaxHealth();
+```
 
 ## Death by lava
 
@@ -358,16 +388,17 @@ public boolean visited(TerrainMap map, int x, int y) {
     assert map != null;
     // TODO: walking on lava should decrease player's health
 
-    // update the visited state of this coordinate
-    TerrainMap visited = visitedMaps.computeIfAbsent(
-            map.getName(), name -> TerrainMapBuilder.nullMap(name, map.width(), map.height()));
+    // update the visited state of this coordinate by setting to a non-null value;
+    // the actual type used does not matter, we merely chose to use Town
+    TerrainMap visited = visitedMaps.computeIfAbsent(map.getName(),
+            name -> nullMap(name, map.width(), map.height()));
     boolean result = visited.modifyAt(x, y, TerrainType.Town);
     return result;
 }
 ```
 
-Implement the `TODO` shown here, by decreasing the player's health by 5 **if the player has visited
-`Lava` at the given coordinate**.
+Implement the `TODO` shown here, by decreasing the player's health by the `lavaHealthDamage` 
+configuration value **if the player has visited `Lava` at the given coordinate**.
 
 > :point_up: You do not have to worry about the final lines of code in this method, that updates the
 > `visitedMaps` data to keep track of what coordinates the player has visited. However, if you can

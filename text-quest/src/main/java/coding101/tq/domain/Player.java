@@ -178,9 +178,7 @@ public class Player {
      * @param health the health to set
      */
     public void setHealth(int health) {
-        if (health > maxHealth) {
-            health = maxHealth;
-        } else if (health < 0) {
+        if (health < 0) {
             health = 0;
         }
         this.health = health;

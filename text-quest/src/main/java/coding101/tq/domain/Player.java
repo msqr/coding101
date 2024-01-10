@@ -49,6 +49,7 @@ public class Player {
     public Player(GameConfiguration config) {
         super();
         this.config = Objects.requireNonNull(config);
+        this.coins = config.initialCoins();
         this.health = config.initialHealth();
         this.maxHealth = config.initialMaxHealth();
     }

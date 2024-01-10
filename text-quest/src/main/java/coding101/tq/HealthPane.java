@@ -3,7 +3,6 @@ package coding101.tq;
 import static coding101.tq.domain.ColorPalette.color;
 import static java.util.Objects.requireNonNull;
 
-import coding101.tq.domain.Player;
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.TextColor.ANSI;
 
@@ -82,7 +81,7 @@ public class HealthPane implements Pane {
 
         // draw blanks to "erase" any lost hearts
         for (int row = startX + full + (partial > 0 ? 1 : 0),
-                        max = startX + Player.MAX_POSSIBLE_HEALTH / PLAYER_HEALTH_HEART_VALUE;
+                        max = startX + game.player().config().maxPossibleHealth() / PLAYER_HEALTH_HEART_VALUE;
                 row < max;
                 row++) {
             game.textGraphics().setCharacter(row, y, ' ');

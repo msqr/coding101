@@ -99,8 +99,13 @@ usage: <options>
   | ||  __/ >  < | |_ \ \/' /| |_| ||  __/\__ \| |_
   \_/ \___|/_/\_\ \__| \_/\_\ \__,_| \___||___/ \__|
 
- -h,--help          show usage information
- -c,--coins <arg>   starting number of coins
+ -c,--coins <arg>        starting number of coins
+ -d,--map-dir <arg>      the main map directory path
+ -f,--save-file <arg>    the save file path to use
+ -h,--help               show usage information
+ -L,--colors-dir <arg>   the colors directory path
+ -l,--colors <arg>       the colors name to load
+ -m,--map <arg>          the main map name to load
 ```
 
 # Goal 1: fix movement

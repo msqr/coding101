@@ -21,9 +21,11 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -314,8 +316,23 @@ public class TextQuest {
     /** The starting coins CLI option. */
     public static final char OPT_COINS = 'c';
 
+    /** The color scheme directory CLI option. */
+    public static final char OPT_COLORS_DIR = 'L';
+
+    /** The color scheme name CLI option. */
+    public static final char OPT_COLORS_NAME = 'l';
+
     /** The help CLI option. */
     public static final char OPT_HELP = 'h';
+
+    /** The map root directory path CLI option. */
+    public static final char OPT_MAIN_MAP_DIR = 'd';
+
+    /** The main map name CLI option. */
+    public static final char OPT_MAIN_MAP_NAME = 'm';
+
+    /** The game save file path CLI option. */
+    public static final char OPT_SAVE_PATH = 'f';
 
     private static Options cliOptions() {
         Options options = new Options();
@@ -327,6 +344,31 @@ public class TextQuest {
                 .longOpt("coins")
                 .hasArg()
                 .desc("starting number of coins")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_COLORS_DIR))
+                .longOpt("colors-dir")
+                .hasArg()
+                .desc("the colors directory path")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_COLORS_NAME))
+                .longOpt("colors")
+                .hasArg()
+                .desc("the colors name to load")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_MAIN_MAP_DIR))
+                .longOpt("map-dir")
+                .hasArg()
+                .desc("the main map directory path")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_MAIN_MAP_NAME))
+                .longOpt("map")
+                .hasArg()
+                .desc("the main map name to load")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_SAVE_PATH))
+                .longOpt("save-file")
+                .hasArg()
+                .desc("the save file path to use")
                 .build());
         return options;
     }
@@ -352,12 +394,10 @@ public class TextQuest {
         System.exit(1);
     }
 
-    public static void main(String[] args) {
-        // parse arguments
+    private static CommandLine commandLine(String[] args) {
         Options opts = cliOptions();
-        CommandLine cl = null;
         try {
-            cl = DefaultParser.builder()
+            return DefaultParser.builder()
                     .setStripLeadingAndTrailingQuotes(true)
                     .build()
                     .parse(opts, args);
@@ -366,60 +406,125 @@ public class TextQuest {
             printHelp(opts);
             System.exit(1);
         }
+        return null;
+    }
+
+    private static TerrainMap map(CommandLine cl) {
+        // load main map
+        String mapPath = "META-INF/tqmaps";
+        if (cl.hasOption(OPT_MAIN_MAP_DIR)) {
+            mapPath = cl.getOptionValue(OPT_MAIN_MAP_DIR);
+        }
+        String mapName = "main";
+        if (cl.hasOption(OPT_MAIN_MAP_NAME)) {
+            mapName = cl.getOptionValue(OPT_MAIN_MAP_NAME);
+        }
+        try {
+            return TerrainMapBuilder.parseResources("%s/%s".formatted(mapPath, mapName))
+                    .build(mapName);
+        } catch (IllegalArgumentException e) {
+            printErrorAndExit(e.getMessage());
+            return null;
+        }
+    }
+
+    private static ColorScheme colors(CommandLine cl, ObjectMapper mapper) {
+        // load color scheme
+        String colorSchemeDir = "META-INF/tqcolors";
+        if (cl.hasOption(OPT_COLORS_DIR)) {
+            colorSchemeDir = cl.getOptionValue(OPT_COLORS_DIR);
+        }
+        String colorScheme = "default";
+        if (cl.hasOption(OPT_COLORS_NAME)) {
+            colorScheme = cl.getOptionValue(OPT_COLORS_NAME);
+        }
+        InputStream in = TextQuest.class
+                .getClassLoader()
+                .getResourceAsStream("%s/%s.json".formatted(colorSchemeDir, colorScheme));
+        try {
+            if (in == null) {
+                // try as file path
+                in = Files.newInputStream(Paths.get(colorSchemeDir, colorScheme));
+            }
+            return mapper.readValue(in, ColorScheme.class);
+        } catch (NoSuchFileException e) {
+            printErrorAndExit("Color scheme file %s not found!".formatted(colorScheme));
+        } catch (IOException e) {
+            printErrorAndExit("Error reading color scheme %s: %s".formatted(colorScheme, e.getMessage()));
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        // parse arguments
+        CommandLine cl = commandLine(args);
 
         if (cl.hasOption(OPT_HELP)) {
-            printHelp(opts);
+            printHelp(cliOptions());
             System.exit(0);
         }
+
+        // create JSON mapper
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(Include.NON_NULL);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+        // load main map
+        TerrainMap mainMap = map(cl);
+
+        // create game settings
+        ColorScheme colors = colors(cl, mapper);
+        Settings settings = new Settings(colors);
+
+        // create game configuration
+        GameConfiguration config = GameConfiguration.DEFAULTS;
+
+        if (cl.hasOption(OPT_COINS)) {
+            try {
+                int coins = Integer.parseInt(cl.getOptionValue(OPT_COINS));
+                if (coins < 0) {
+                    throw new IllegalArgumentException();
+                }
+                config = config.withInitialCoins(coins);
+            } catch (Exception e) {
+                printErrorAndExit("The --coins argument must be a number 0 or more.");
+            }
+        }
+
+        // create player
+        Player player = null;
+        Path save = Paths.get("game.tqsave");
+        if (cl.hasOption(OPT_SAVE_PATH)) {
+            save = Paths.get(cl.getOptionValue(OPT_SAVE_PATH));
+        }
+        if (Files.isReadable(save)) {
+            try {
+                player = new Persistence(mapper).loadPlayer(save);
+                player.configure(config);
+            } catch (IOException e) {
+                printErrorAndExit("I/O error loading saved game file (%s): %s".formatted(save, e.getMessage()));
+            }
+        } else {
+            player = new Player(config);
+            player.moveTo(mainMap, mainMap.startingCoordinate());
+        }
+
+        // free CommandLine
+        cl = null;
 
         try (Terminal terminal = new DefaultTerminalFactory().createTerminal()) {
             TerminalSize screenSize = terminal.getTerminalSize();
             if (screenSize.getColumns() < 30 || screenSize.getRows() < 10) {
                 printErrorAndExit("Terminal must be at least 30x10.");
-            }
-
-            // create JSON mapper
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setSerializationInclusion(Include.NON_NULL);
-            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-
-            // load color scheme
-            String colorScheme = "default"; // TODO support command-line switch
-            ColorScheme colors = mapper.readValue(
-                    TextQuest.class
-                            .getClassLoader()
-                            .getResourceAsStream("META-INF/colors/%s.json".formatted(colorScheme)),
-                    ColorScheme.class);
-
-            // load map
-            String mapName = "main"; // TODO support command-line switch
-            TerrainMap mainMap = TerrainMapBuilder.parseResources("META-INF/tqmaps/%s".formatted(mapName))
-                    .build(mapName);
-
-            // create game settings
-            Settings settings = new Settings(colors);
-
-            // create player
-            Player player = null;
-            // TODO: allow save path command-line switch
-            Path save = Paths.get("game.tqsave");
-            if (Files.isReadable(save)) {
-                player = new Persistence(mapper).loadPlayer(save);
-            } else {
-                player = new Player();
-                player.moveTo(mainMap, mainMap.startingCoordinate());
-                if (cl.hasOption(OPT_COINS)) {
-                    try {
-                        int coins = Integer.parseInt(cl.getOptionValue(OPT_COINS));
-                        if (coins < 0) {
-                            throw new IllegalArgumentException();
-                        }
-                        player.setCoins(coins);
-                    } catch (Exception e) {
-                        printErrorAndExit("The --coins argument must be a number 0 or more.");
-                    }
-                }
             }
 
             // create text screen on top of our terminal
@@ -434,7 +539,7 @@ public class TextQuest {
                 screen.stopScreen();
             }
         } catch (IOException e) {
-            System.err.println("I/O error with terminal (%s), bye!".formatted(e.getMessage()));
+            printErrorAndExit("I/O error with terminal (%s), bye!".formatted(e.getMessage()));
         }
     }
 }

@@ -1,9 +1,11 @@
 package coding101.tq.domain;
 
+import coding101.tq.GameConfiguration;
 import coding101.tq.util.TerrainMapBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -13,15 +15,11 @@ import java.util.TreeSet;
  */
 public class Player {
 
-    /** The default (starting) health value. */
-    public static final int DEFAULT_HEALTH = 30;
-
-    /** The maximum possible health value. */
-    public static final int MAX_POSSIBLE_HEALTH = 100;
-
     private final PlayerItems items = new PlayerItems();
-    private int health = DEFAULT_HEALTH;
-    private int maxHealth = DEFAULT_HEALTH;
+
+    private GameConfiguration config;
+    private int health;
+    private int maxHealth;
     private String activeMapName;
     private int x;
     private int y;
@@ -40,6 +38,36 @@ public class Player {
      */
     public Player() {
         super();
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param config the game configuration
+     */
+    public Player(GameConfiguration config) {
+        super();
+        this.config = Objects.requireNonNull(config);
+        this.health = config.initialHealth();
+        this.maxHealth = config.initialMaxHealth();
+    }
+
+    /**
+     * Set the game configuration.
+     *
+     * @param config the configuration to set
+     */
+    public void configure(GameConfiguration config) {
+        this.config = config;
+    }
+
+    /**
+     * Get the game configuration.
+     *
+     * @return the game configuration
+     */
+    public GameConfiguration config() {
+        return this.config;
     }
 
     /**

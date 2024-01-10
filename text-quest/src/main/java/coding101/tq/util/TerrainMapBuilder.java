@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -277,10 +278,16 @@ public class TerrainMapBuilder {
                                 "Error parsing resource [%s]: %s".formatted(p, e.getMessage()), e);
                     }
                 });
+            } catch (NoSuchFileException e) {
+                throw new IllegalArgumentException("Map directory [%s] not found!".formatted(directoryName));
             } catch (IOException e) {
                 throw new IllegalArgumentException(
                         "Error loading tile files from directory [%s]: %s".formatted(directoryName, e.getMessage()), e);
             }
+        }
+        if (b.getSize() < 1) {
+            throw new IllegalArgumentException(
+                    "Map directory [%s] does not contain any map tile files!".formatted(directoryName));
         }
         return b;
     }

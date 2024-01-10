@@ -488,12 +488,12 @@ public class Player {
     }
 
     /**
-     * Test if a player can move to a given coordinate.
+     * Test if a player can move to a given coordinate on a given map.
      *
      * @param map the map to test
-     * @param x   the x coordinate
-     * @param y   the y coordinate
-     * @return {@literal true} if the player is allowed to move to the coordinate
+     * @param x   the x coordinate to test
+     * @param y   the y coordinate to test
+     * @return {@literal true} if the player is allowed to move to the (x,y) coordinate on {@code map}
      */
     public boolean canMoveTo(TerrainMap map, int x, int y) {
         // get terrain at the desired position so we can validate it is OK to move

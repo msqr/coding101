@@ -1,7 +1,5 @@
 package coding101.tq.domain;
 
-import static coding101.tq.util.TerrainMapBuilder.nullMap;
-
 import coding101.tq.GameConfiguration;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +14,6 @@ import java.util.TreeSet;
  */
 public class Player {
 
-    private final PlayerItems items = new PlayerItems();
-
     private GameConfiguration config;
     private int health;
     private int maxHealth;
@@ -26,7 +22,8 @@ public class Player {
     private int y;
     private Coordinate onboard; // the map coordinate of the boarded vehicle
     private int coins;
-    private Map<String, TerrainMap> visitedMaps = new HashMap<>(2);
+    private final PlayerItems items = new PlayerItems();
+    private Map<String, VisitedMap> visitedMaps = new HashMap<>(2);
     private Map<String, Set<Coordinate>> interactions = new HashMap<>(16);
 
     // a mapping of dynamic vehicles (ships) for each map
@@ -339,9 +336,8 @@ public class Player {
 
         // update the visited state of this coordinate by setting to a non-null value;
         // the actual type used does not matter, we merely chose to use Town
-        TerrainMap visited =
-                visitedMaps.computeIfAbsent(map.getName(), name -> nullMap(name, map.width(), map.height()));
-        boolean result = visited.modifyAt(x, y, TerrainType.Town);
+        VisitedMap visited = visitedMaps.computeIfAbsent(map.getName(), name -> new VisitedMap());
+        boolean result = visited.visit(x, y);
         return result;
     }
 
@@ -354,8 +350,8 @@ public class Player {
      * @return {@code true} if the coordinate has been visited before
      */
     public boolean hasVisited(TerrainMap map, int x, int y) {
-        TerrainMap visited = visitedMaps.get(map.getName());
-        return (visited != null && visited.terrainAt(x, y) == TerrainType.Town);
+        VisitedMap visited = visitedMaps.get(map.getName());
+        return (visited != null && visited.hasVisited(x, y));
     }
 
     /**
@@ -367,26 +363,18 @@ public class Player {
      * @return {@code true} if the coordinate has been visited before
      */
     public boolean hasVisitedNear(TerrainMap map, int x, int y) {
-        TerrainMap visited = visitedMaps.get(map.getName());
-        for (int row = Math.max(0, y - 1), maxRow = Math.min(visited.height() - 1, y + 1); row <= maxRow; row++) {
-            for (int col = Math.max(0, x - 1), maxCol = Math.min(visited.width() - 1, x + 1); col <= maxCol; col++) {
-                if (visited.terrainAt(col, row) == TerrainType.Town) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        VisitedMap visited = visitedMaps.get(map.getName());
+        return (visited != null && visited.hasVisitedNear(x, y));
     }
 
     /**
      * Get the visited map data.
      *
-     * Each {@link TerrainMap} represents terrain visited by the player: all
-     * non-null values have been visited.
+     * Each {@link VisitedMap} represents terrain visited by the player.
      *
      * @return the visited maps, never {@literal null}
      */
-    public Map<String, TerrainMap> getVisitedMaps() {
+    public Map<String, VisitedMap> getVisitedMaps() {
         return visitedMaps;
     }
 
@@ -395,7 +383,7 @@ public class Player {
      *
      * @param visitedMaps the visited maps to set
      */
-    public void setVisitedMaps(Map<String, TerrainMap> visitedMaps) {
+    public void setVisitedMaps(Map<String, VisitedMap> visitedMaps) {
         if (visitedMaps == null) {
             visitedMaps = new HashMap<>(2);
         }
@@ -450,6 +438,28 @@ public class Player {
      */
     public void setInteractions(Map<String, Set<Coordinate>> interactions) {
         this.interactions = interactions;
+    }
+
+    /**
+     * Get the vehicle location data.
+     *
+     * This is a mapping of {@link TerrainMap} names an associated mapping of
+     * vehicle origin coordinates to associated current coordinates, to track the
+     * location of vehicles as they are moved.
+     *
+     * @return the vehicle location data
+     */
+    public Map<String, Map<Coordinate, Coordinate>> getVehicles() {
+        return vehicles;
+    }
+
+    /**
+     * Set the vehicle location data.
+     *
+     * @param vehicles the vehicle location data to set
+     */
+    public void setVehicles(Map<String, Map<Coordinate, Coordinate>> vehicles) {
+        this.vehicles = vehicles;
     }
 
     /**

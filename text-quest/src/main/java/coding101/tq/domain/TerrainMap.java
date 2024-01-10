@@ -26,12 +26,9 @@ public class TerrainMap {
 
     private final String name;
     private final Map<String, String> metadata;
-
-    // following NOT final to support changes via modifyAt()... can happen after map
-    // has expanded but save file was in old (smaller) map
-    private int width;
-    private int height;
-    private TerrainType[][] terrain;
+    private final int width;
+    private final int height;
+    private final TerrainType[][] terrain;
 
     /**
      * Constructor.
@@ -137,39 +134,6 @@ public class TerrainMap {
             return TerrainType.Empty;
         }
         return terrain[y][x];
-    }
-
-    /**
-     * Modify the terrain type at a specific coordinate.
-     *
-     * @param x    the x coordinate
-     * @param y    the y coordinate
-     * @param type the type to set
-     * @returns {@code true} if the terrain was changed
-     */
-    public final boolean modifyAt(int x, int y, TerrainType type) {
-        if (y >= terrain.length || x >= width) {
-            // expand rows or width with copy to new 2D array
-            final int newWidth = Math.max(x + 1, width);
-            final int newHeight = Math.max(y + 1, terrain.length);
-            TerrainType[][] newTerrain = new TerrainType[newHeight][];
-            for (int row = 0, maxRow = terrain.length; row < maxRow; row++) {
-                TerrainType[] newRow = new TerrainType[newWidth];
-                System.arraycopy(terrain[row], 0, newRow, 0, terrain[row].length);
-                newTerrain[row] = newRow;
-            }
-            for (int row = terrain.length, maxRow = newHeight; row < maxRow; row++) {
-                newTerrain[row] = new TerrainType[newWidth];
-            }
-            terrain = newTerrain;
-            width = newWidth;
-            height = newHeight;
-        }
-        if (terrain[y][x] != type) {
-            terrain[y][x] = type;
-            return true;
-        }
-        return false;
     }
 
     @Override

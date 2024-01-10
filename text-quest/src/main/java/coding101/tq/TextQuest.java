@@ -5,6 +5,8 @@ import coding101.tq.domain.Player;
 import coding101.tq.domain.Settings;
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.domain.TerrainType;
+import coding101.tq.util.BitSetJson;
+import coding101.tq.util.CoordinateJson;
 import coding101.tq.util.Persistence;
 import coding101.tq.util.TerrainMapBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -481,6 +483,8 @@ public class TextQuest {
         mapper.setSerializationInclusion(Include.NON_NULL);
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.registerModule(CoordinateJson.createCoordinateModule());
+        mapper.registerModule(BitSetJson.createBitSetModule());
 
         // load main map
         TerrainMap mainMap = map(cl);

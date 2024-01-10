@@ -17,7 +17,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -390,22 +389,5 @@ public class TerrainMapBuilder {
             rows.add(row);
         }
         return rows.toArray(TerrainType[][]::new);
-    }
-
-    /**
-     * Construct a new {@link TerrainMap} of all {@literal null} values.
-     *
-     * @param name   the map name
-     * @param width  the map width
-     * @param height the map height
-     * @return the new map instance
-     * @throws IllegalArgumentException if any argument is null
-     */
-    public static TerrainMap nullMap(String name, int width, int height) {
-        TerrainType[][] data = new TerrainType[height][];
-        for (int row = 0; row < height; row++) {
-            data[row] = new TerrainType[width];
-        }
-        return new TerrainMap(name, data, Collections.emptyMap());
     }
 }

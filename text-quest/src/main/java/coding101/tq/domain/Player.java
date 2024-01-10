@@ -101,10 +101,19 @@ public class Player {
     /**
      * Update the player coordinate.
      *
+     * This method will update the player's {@code x} and {@code y} coordinate
+     * values to those given, set the {@code activeMapName} to the name of the given
+     * {@code map}, and then call the {@link #visited(TerrainMap, int, int)} method
+     * to mark the coordinate as "visited".
+     *
+     * If the {@code onboard} property is {@code true} then the {@code vehicles}
+     * data will be updated to track vehicle movement.
+     *
      * @param map the map to move to
      * @param x   the X coordinate
      * @param y   the Y coordinate
      * @return {@code true} if visiting the coordinate for the first time
+     * @see #visited(TerrainMap, int, int)
      */
     public boolean moveTo(TerrainMap map, int x, int y) {
         if (onboard != null) {
@@ -323,10 +332,19 @@ public class Player {
     /**
      * Mark a specific map coordinate as visited.
      *
+     * This method is automatically called by the
+     * {@link #moveTo(TerrainMap, int, int)} method. It can perform any player logic
+     * that occurs as a consequence of visiting the given coordinate, for example
+     * deducting health when visiting a "dangerous" terrain type like lava.
+     *
+     * This method maintains the {@code visitedMaps} data by calling
+     * {@link VisitedMap#visit(int, int)} with the given x,y coordinates.
+     *
      * @param map the map
      * @param x   the x coordinate
      * @param y   the y coordinate
      * @return {@code true} if the coordinate was not visited before
+     * @see #moveTo(TerrainMap, int, int)
      */
     public boolean visited(TerrainMap map, int x, int y) {
         assert map != null;
@@ -493,7 +511,8 @@ public class Player {
      * @param map the map to test
      * @param x   the x coordinate to test
      * @param y   the y coordinate to test
-     * @return {@literal true} if the player is allowed to move to the (x,y) coordinate on {@code map}
+     * @return {@literal true} if the player is allowed to move to the (x,y)
+     *         coordinate on {@code map}
      */
     public boolean canMoveTo(TerrainMap map, int x, int y) {
         // get terrain at the desired position so we can validate it is OK to move

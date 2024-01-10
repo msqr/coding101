@@ -346,10 +346,19 @@ time a player moves to a new coordinate:
 /**
  * Mark a specific map coordinate as visited.
  *
+ * This method is automatically called by the
+ * {@link #moveTo(TerrainMap, int, int)} method. It can perform any player logic
+ * that occurs as a consequence of visiting the given coordinate, for example
+ * deducting health when visiting a "dangerous" terrain type like lava.
+ *
+ * This method maintains the {@code visitedMaps} data by calling
+ * {@link VisitedMap#visit(int, int)} with the given x,y coordinates.
+ *
  * @param map the map
  * @param x   the x coordinate
  * @param y   the y coordinate
  * @return {@code true} if the coordinate was not visited before
+ * @see #moveTo(TerrainMap, int, int)
  */
 public boolean visited(TerrainMap map, int x, int y) {
     assert map != null;

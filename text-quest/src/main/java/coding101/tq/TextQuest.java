@@ -183,6 +183,10 @@ public class TextQuest {
                 // move player
                 if (newX >= 0 && newY >= 0 && newX < activeMap.width() && newY < activeMap.height()) {
                     ui.map().movePlayer(newX, newY);
+
+                    // redraw health in case that changed
+                    ui.health().draw();
+
                     screen.refresh();
                 }
                 continue;

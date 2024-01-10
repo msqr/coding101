@@ -364,8 +364,7 @@ public boolean visited(TerrainMap map, int x, int y) {
     assert map != null;
     // TODO: walking on lava should decrease player's health
 
-    // update the visited state of this coordinate by setting to a non-null value;
-    // the actual type used does not matter, we merely chose to use Town
+    // update the visited state of this coordinate
     VisitedMap visited = visitedMaps.computeIfAbsent(map.getName(), name -> new VisitedMap());
     boolean result = visited.visit(x, y);
     return result;

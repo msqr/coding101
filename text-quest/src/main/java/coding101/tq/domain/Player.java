@@ -1,7 +1,8 @@
 package coding101.tq.domain;
 
+import static coding101.tq.util.TerrainMapBuilder.nullMap;
+
 import coding101.tq.GameConfiguration;
-import coding101.tq.util.TerrainMapBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -335,9 +336,10 @@ public class Player {
         assert map != null;
         // TODO: walking on lava should decrease player's health
 
-        // update the visited state of this coordinate
-        TerrainMap visited = visitedMaps.computeIfAbsent(
-                map.getName(), name -> TerrainMapBuilder.nullMap(name, map.width(), map.height()));
+        // update the visited state of this coordinate by setting to a non-null value;
+        // the actual type used does not matter, we merely chose to use Town
+        TerrainMap visited =
+                visitedMaps.computeIfAbsent(map.getName(), name -> nullMap(name, map.width(), map.height()));
         boolean result = visited.modifyAt(x, y, TerrainType.Town);
         return result;
     }

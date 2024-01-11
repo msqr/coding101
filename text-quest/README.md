@@ -154,6 +154,8 @@ We can visualise that as a 2D array with rows and columns, like this:
 > :question: Using (x,y) coordinate notation where `x` is a column and `y` is a row, what coodinate
 > is Mountain (`A`)? What coordinate is Forrest (`^`)?
 
+### About terrain
+
 The `TerrainType` enumeration models all possible terrain types, and also defines the
 text character used by that type:
 
@@ -195,26 +197,36 @@ defines a constant named `CAVE` that is equal to the letter `O`.
 
 ### Finding the type of terrain at a map coordinate
 
-The `TerrainMap` class will be populated with the map data read from a game map file. You may 
-have noticed the `canMoveTo(map, x, y)` method above called the `terrainAt(x, y)` method on
-the passed-in `map` object. That method will return the `TerrainType` at the given (x,y)
-coordinate in the map, so that is the method to use if you want to know what the terrain is
-at a given coordinate. That method looks like this:
+The `TerrainMap` class will be populated with the map data read from a game map file. It provides
+the `terrainAt(x, y)` method, that returns the `TerrainType` at the given (x,y) coordinate in the
+map, so that is the method to use if you want to know what the terrain is at a given coordinate.
+That method looks like this:
 
 ```java
-/**
- * Get the terrain type at a specific coordinate.
- *
- * @param x the x coordinate
- * @param y the y coordinate
- * @return the terrain type, or {@link TerrainType#Empty} if {@code x} or
- *         {@code y} are out of bounds
- */
-public final TerrainType terrainAt(int x, int y) {
-    if (x >= width || y >= height || x < 0 || y < 0) {
-        return TerrainType.Empty;
+public class TerrainMap {
+
+    // the 2D array of map data, as TerrainType values
+    private final TerrainType[][] terrain;
+
+    // the width and height of the map data, saved here for convenience
+    private final int width;
+    private final int height;
+
+    /**
+     * Get the terrain type at a specific coordinate.
+     *
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @return the terrain type, or {@link TerrainType#Empty} if {@code x} or
+     *         {@code y} are out of bounds
+     */
+    public TerrainType terrainAt(int x, int y) {
+        if (x >= width || y >= height || x < 0 || y < 0) {
+            return TerrainType.Empty;
+        }
+        return terrain[y][x];
     }
-    return terrain[y][x];
+
 }
 ```
 
@@ -225,6 +237,9 @@ of enum values.
 
 > :question: Why is `terrain[y][x]` used and not `terrain[x][y]`? Does it matter? Refer 
 > [back](#about-the-map-and-terrain) for details.
+
+> :question: The `terrainAt(x,y)` method refers to `width`, `height`, and `terrain` variables.
+> Where are those defined, and why can the method use them at all?
 
 ## About ships
 
@@ -246,13 +261,32 @@ a ship you must use the `vehicleLocatedAt(map, x, y)` method in the
 [Player](./src/main/java/coding101/tq/domain/Player.java) class. That method will return `true` only
 on coordinates that hold a ship, even after the ship has moved.
 
-Take a look back at that `canMoveTo()` method that deals with ship movement:
+Take a look at the `canMoveTo()` method that deals with ship movement:
 
 ```java
-    if (onboard()) {
-        // on a ship! can only travel to another water
-        return (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
-            && !vehicleLocatedAt(map, x, y);
+public class Player {
+
+    /**
+     * Test if a player can move to a given coordinate on a given map.
+     *
+     * @param map the map to test
+     * @param x   the x coordinate to test
+     * @param y   the y coordinate to test
+     * @return {@literal true} if the player is allowed to move to the (x,y)
+     *         coordinate on {@code map}
+     */
+    public boolean canMoveTo(TerrainMap map, int x, int y) {
+        // get terrain at the desired position so we can validate it is OK to move
+        final TerrainType newTerrain = map.terrainAt(x, y);
+
+        // test for on board a ship
+        if (onboard()) {
+            // on a ship! can only travel to another water
+            return (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
+                    && !vehicleLocatedAt(map, x, y);
+        }
+        // TODO: finish validation that player can move to specified coordinate
+        return true;
     }
 ```
 
@@ -264,6 +298,51 @@ the entire logic statement in plain language like:
 
 > :question: Why is the `|| newTerrain == TerrainType.Ship` clause included in this logic,
 > when logically a ship can only move to Water terrain?
+
+### About `return`
+
+Notice how there are 2 `return` statements in this method. A method can define any number of
+`return` statements, and they do not have to be on the final lines of the method. For methods like
+this one that are defined to return a value (a `boolean` here) then the `return` statement accepts
+an _expression_ and returns the **result of evaluating that expression** to the caller. The first
+`return` statement evaluates this **logic expression**:
+
+```java
+(newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
+    && !vehicleLocatedAt(map, x, y)
+```
+
+A **logic expression** is anything that results in a `boolean` outcome. Logic expressions
+are used in `if` statements, for example.
+
+Some people prefer methods have only at most 1 `return` statement. The `canMoveTo()` method
+could be re-written in this style, for example:
+
+```java
+public boolean canMoveTo(TerrainMap map, int x, int y) {
+    // get terrain at the desired position so we can validate it is OK to move
+    final TerrainType newTerrain = map.terrainAt(x, y);
+
+    // variable to store final retult, initialized to true
+    boolean result = true;
+
+    // test for on board a ship
+    if (onboard()) {
+        // on a ship! can only travel to another water
+        result = (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
+                && !vehicleLocatedAt(map, x, y);
+    } else {
+        // TODO: finish validation that player can move to specified coordinate,
+        //       changing the result variable as appropriate
+    }
+
+    // return our result
+    return result;
+}
+```
+
+Both of these method implementaions logically do the same thing, and to the caller it
+does not matter which style was used as it only cares about the final result.
 
 ## About the player
 
@@ -284,137 +363,275 @@ public class Player {
 }
 ```
 
-# Goal 1: player health and death by lava
+## Class fields, method arguments, variable scope, and `this`
 
-A player has a "health" status that is modeled as an integer on the [`Player`](./src/main/java/coding101/tq/domain/Player.java) class:
+Knowing that `Player` has `x` and `y` **fields** defined, take a look again at that `canMoveTo(map, x, y)`
+method, along with `getX()` and `getY()` methods known as **getter methods** or just **getters** in Java:
 
 ```java
 public class Player {
 
-    private GameConfiguration config;
+    // imagine a player is located at (10,11) by initializing x,y to that here
+
+    private int x = 10;
+    private int y = 11;
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public boolean canMoveTo(TerrainMap map, int x, int y) {
+        // get terrain at the desired position so we can validate it is OK to move
+        TerrainType newTerrain = map.terrainAt(x, y);
+
+        // ...
+        return true;
+    }
+}
+```
+
+The `canMoveTo()` method defines `x` and `y` **arguments**. The method arguments are called **local
+variables** because they are only available (local) to the method body. Imagine we have some code
+that calls this method, passing in X and Y values of 2 and 3:
+
+```java
+boolean result = player.canMoveTo(map, 2, 3);
+```
+
+Inside the `canMoveTo(map, 2, 3)` invocation, what values do `x` and `y` have at this line:
+
+```java
+TerrainType newTerrain = map.terrainAt(x, y);
+```
+
+> :question: Do `x` and `y` have the values (10, 11) or (2, 3)?
+
+If you answered (2,3) you are correct. Why is that, when there are two valid `x` variables and two
+valid `y` variables available? 
+
+Variables that are "available" to a particular line of code are said to be **in scope**. The
+**fields** of a class are automatically **in scope** to every method of that class. That is why the
+following method can refer to `x` -- it refers to the class field `x`:
+
+```java
+public class Player {
+
+    private int x = 10;
+
+    public int getX() {
+        // x refers to the Player class field x above, which has the value 10
+        return x; 
+    }
+```
+
+In Java, **local variables** override, or **mask** class variables of the same name. That is
+why the `map.terrainAt(x, y)` line above refers to (2, 3) and not (10, 11).
+
+What if you wanted to refer to masked field variable? In Java there is a special keyword
+`this` that is automatically available to every class method, and it always refers to 
+the current **class instance**. In the above `getX()` method, Java has actually magically
+added `this.` to the code, so behind the scenes the code looks like this:
+
+```java
+public int getX() {
+    return this.x; 
+}
+```
+
+Java is merely helping you, the coder, do something coders are really good at: being lazy. It would
+be very tedious having to type `this.x` and `this.y` and `this.whatever` all the time, so Java lets
+you omit the `this.` and it will automagically figure out what **in scope** variable you are
+referring to.
+
+> :bulb: You might like to refresh you memory on [classes vs
+> instances](../hello-world/README.md#classes-vs-instances). In this example, `Player` is the class,
+> and an instance of `Player` would be created like `Player player = new Player();`, so the `player`
+> **variable** refers to a `Player` **class instance**.
+
+Now back to our immediate problem: what if you wanted to refer to a masked variable? Imagine
+a method `moveTo(int x, int y)` that is meant to update a player's (x,y) field values:
+
+```java
+public class Player {
+
+    private int x = 10;
+    private int y = 11;
+
+    public int getX() {
+        return x;
+    }
+
+    public int moveTo(int x, int y) {
+        x = x;
+        y = y;
+    }
+}
+```
+
+Then imagine calling this method:
+
+```java
+player.moveTo(2, 3);
+```
+
+> :question: What would `getX()` return now, after calling `moveTo(2, 3)` like this? Something is
+> not quite right. What does `x = x` do here? Well, what does `x` refer to here? What `x` is **in
+> scope** in this method?
+
+We need to use an explicit `this.x` and `this.y` in this method to refer to both the **local**
+variables and the **class fields** in the same method:
+
+```java
+public int moveTo(int x, int y) {
+    this.x = x;
+    this.y = y;
+}
+```
+
+## About blocks and scope
+
+In Java, a **block** is a chunk of code between curly braces `{}`. The clever observer
+(that's you!) will have noticed that **methods** are defined with `{}`, which then means
+each method is also a **block**.
+
+> :bulb: Where else have you noticed blocks? How about `if` statements? How about `for` or `while`
+> loops? They all use `{}`... and yes, they all define blocks. What about classes? They are defined
+> like `class Foo {}`... is that also a block? Yes indeed!
+
+So blocks are everywhere in Java. Blocks also define variable **scopes**... and as blocks
+can be **nested** within each other, that means scopes are nested within each other as well.
+Let us look at another bit of example code:
+
+```java
+public class Player {
+    // START CLASS BLOCK (1)
+
     private int health;
-    private int maxHealth;
 
-    /**
-     * Constructor.
-     *
-     * @param config the game configuration
-     */
-    public Player(GameConfiguration config) {
-        super();
-        this.config = Objects.requireNonNull(config);
-        this.health = config.initialHealth();
-        this.maxHealth = config.initialMaxHealth();
+     public int getHealth() {
+        // START METHOD BLOCK 2a
+        return health;
+        // START METHOD BLOCK 2a
     }
 
-}
-```
+   public void takeDamage(int amount) {
+        // START METHOD BLOCK (2b)
+        health -= amount;
 
-The `health` field is used to keep track of the player's current health. The `maxHealth` field is
-used to keep track of the maximum health the player can currently have. As a player's experience
-grows in the game, the `maxHealth` can be increased, so the player's health _capacity_ grows
-stronger and the player can take more damage as they fight more powerful enemies.
+        if (health < 0) {
+            // START IF BLOCK (3a)
+            int overkill = 0 - health;
+            System.out.println("You died, by " +overkill + " health!");
+            // END IF BLOCK (3a)
+        } else {
+            // START ELSE BLOCK (3b)
+            System.out.println("Ouch! Luckily you still have " +health + " health.");
+            // END ELSE BLOCK (3b)
+        }
 
-The `GameConfiguration` class defines several "knobs" that can be tweaked via command line arguments.
-There are a few health-related properties:
-
-```java
-public record GameConfiguration(
-        int initialCoins,
-        int initialHealth,
-        int initialMaxHealth,
-        int maxPossibleHealth,
-        int lavaHealthDamage) {
-}
-```
-
-The `initialHealth` property defines the player's starting `health` (this defaults to 30), and the
-`initialMaxHealth` property the player's starting `maxHealth` (this defaults to 30). The
-`maxPossibleHealth` defines  defines the maximum possible health value that can be achieved in the
-game (this defaults to 100).
-
-You can see that the `Player` constructor initializes the `health` and `maxHealth` from the 
-configuration:
-
-```java
-this.health = config.initialHealth();
-this.maxHealth = config.initialMaxHealth();
-```
-
-## Death by lava
-
-A player can walk on lava, but their health should **decrease** as a result. The `visited(map, x,
-y)` method on the [`Player`](./src/main/java/coding101/tq/domain/Player.java) class is called each
-time a player moves to a new coordinate:
-
-```java
-/**
- * Mark a specific map coordinate as visited.
- *
- * This method is automatically called by the
- * {@link #moveTo(TerrainMap, int, int)} method. It can perform any player logic
- * that occurs as a consequence of visiting the given coordinate, for example
- * deducting health when visiting a "dangerous" terrain type like lava.
- *
- * This method maintains the {@code visitedMaps} data by calling
- * {@link VisitedMap#visit(int, int)} with the given x,y coordinates.
- *
- * @param map the map
- * @param x   the x coordinate
- * @param y   the y coordinate
- * @return {@code true} if the coordinate was not visited before
- * @see #moveTo(TerrainMap, int, int)
- */
-public boolean visited(TerrainMap map, int x, int y) {
-    assert map != null;
-    // TODO: walking on lava should decrease player's health
-
-    // update the visited state of this coordinate
-    VisitedMap visited = visitedMaps.computeIfAbsent(map.getName(), name -> new VisitedMap());
-    boolean result = visited.visit(x, y);
-    return result;
-}
-```
-
-Implement the `TODO` shown here, by decreasing the player's health by the `lavaHealthDamage` 
-configuration value **if the player has visited `Lava` at the given coordinate**.
-
-> :point_up: You do not have to worry about the final lines of code in this method, that updates the
-> `visitedMaps` data to keep track of what coordinates the player has visited. However, if you can
-> explain what that code does in plain language, you earn super bonus points!
-
-# Goal 2: fix movement
-
-At the moment the player can move across any terrain. A player should not be able to move onto
-**Mountain**, **Water**, **WallHorizontal**, **WallVertical**, or **WallCorner** terrain, however. A
-player should be able to move onto a **Ship**, and then board that ship, and then move to any
-**Water** terrain. To fix this method, complete the `canMoveTo(map, x, y)` method in the
-[Player](./src/main/java/coding101/tq/domain/Player.java) class. Currently the method looks like
-this:
-
-```java
-/**
- * Test if a player can move to a given coordinate on a given map.
- *
- * @param map the map to test
- * @param x   the x coordinate to test
- * @param y   the y coordinate to test
- * @return {@literal true} if the player is allowed to move to the (x,y) coordinate on {@code map}
- */
-public boolean canMoveTo(TerrainMap map, int x, int y) {
-    // get terrain at the desired position so we can validate it is OK to move
-    final TerrainType newTerrain = map.terrainAt(x, y);
-
-    // test for on board a ship
-    if (onboard()) {
-        // on a ship! can only travel to another water
-        return (newTerrain == TerrainType.Water || newTerrain == TerrainType.Ship) 
-            && !vehicleLocatedAt(map, x, y);
+        // END METHOD BLOCK (2b)
     }
-    // TODO: finish validation that player can move to specified coordinate
-    return true;
+
+    // END CLASS BLOCK (1)
+} 
+```
+
+The various blocks are annoated with `// START` and `// END` comments. You can think of
+the variables in scope like a **combination** of variables from all blocks, sort of like this:
+
+| Block | Variables in scope |
+|:------|:----------|
+| 1     | `health` |
+| 2a    | `health` |
+| 2b    | `health`, `amount` |
+| 3a    | `health`, `amount`, `overkill` |
+| 3b    | `health`, `amount` |
+
+Notice how `overkill` is not available in block 3b (or any other block). That variable
+is only **in scope** in the block it is defined in: 3a.
+
+### Comparing Java scope to JavaScript
+
+Different programming languages treat variable scope differently. Both languages define blocks with
+`{}` characters, and a **function** in JavaScript is like a **method** in Java. In JavaScript
+variables can be defined with `var` or `let`, and they have different scope meanings: `var` defines
+the variable in **function scope** and **let** uses **block scope**. Take this example:
+
+```js
+class Player {
+    // START CLASS BLOCK (1)
+
+    health = 10;
+
+    getHealth() {
+        // START FUNCTION BLOCK 2a
+        return health;
+        // START FUNCTION BLOCK 2a
+    }
+
+   takeDamage(amount) {
+        // START FUNCTION BLOCK (2b)
+        this.health -= amount;
+
+        console.log(`Overkill START 2a: ${overkill}`);
+
+        if (this.health < 0) {
+            // START IF BLOCK (3a)
+            var overkill = 0 - this.health;
+            console.log(`You died, by ${overkill} health!`);
+            // END IF BLOCK (3a)
+        } else {
+            // START ELSE BLOCK (3b)
+            console.log(`Ouch! Luckily you still have ${this.health} health.`);
+            // END ELSE BLOCK (3b)
+        }
+
+        console.log(`Overkill END 2a: ${overkill}`);
+
+        // END FUNCTION BLOCK (2b)
+    }
+
+    // END CLASS BLOCK (1)
 }
 ```
 
-> :point_up: **Note** the `// TODO` comment, which is where you should complete the implementation.
-> The `if (onboard()){}` block before that handles the logic for movement when on board a ship.
+Look what gets logged to the console if you call `takeDamage(5)`:
+
+```
+Overkill START 2a: undefined
+Ouch! Luckily you still have 5 health.
+Overkill END 2a: undefined
+```
+
+Now look what happens when you call `takeDamage(20)`:
+
+```
+Overkill START 2a: undefined
+You died, by 10 health!
+Overkill END 2a: 10
+```
+
+Spot the difference on the `OVERKILL END 2a:` output? How is `overkill` in scope for block 2b, when
+it was defined in block 3a? This is a feature of JavaScript's **function scope** for variables
+defined with `var`: the scope is **hoisted** to the closest-defined function scope, which is block
+2b.
+
+If we instead defined `overkill` using `let`, then JavaScript uses **block scope** in the same
+manner as Java, and then the code will produce a `ReferenceError: overkill is not defined`
+exception.
+
+> :bulb: The `var` function scope catches many JavaScript developers by surprise, especially
+> when coming from other languages like Java, and is why `let` is often recommended over `var`
+> in JavaScript these days (`let` did not exist in JavaScript origionally).
+
+# Goals
+
+Here are the goals of this coding challenge:
+
+ 1. [Death by lava](./README-G1.md) (walk on lava)
+ 2. [Hitting a wall](./README-G2.md) (fix movement)
+ 3. [Risky business](./README-G3.md) (open chests)

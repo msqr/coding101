@@ -99,13 +99,18 @@ usage: <options>
   | ||  __/ >  < | |_ \ \/' /| |_| ||  __/\__ \| |_
   \_/ \___|/_/\_\ \__| \_/\_\ \__,_| \___||___/ \__|
 
- -c,--coins <arg>        starting number of coins
- -d,--map-dir <arg>      the main map directory path
- -f,--save-file <arg>    the save file path to use
- -h,--help               show usage information
- -L,--colors-dir <arg>   the colors directory path
- -l,--colors <arg>       the colors name to load
- -m,--map <arg>          the main map name to load
+ -c,--coins <arg>          starting number of coins
+ -C,--chest-coins <arg>    maximum number of coins a chest can provide
+ -d,--map-dir <arg>        the main map directory path
+ -f,--save-file <arg>      the save file path to use
+ -h,--help                 show usage information
+ -K,--colors-dir <arg>     the colors directory path
+ -k,--colors <arg>         the colors name to load
+ -l,--chest-luck <arg>     a percentage from 1-100 that a chest will
+                           reward rather than penalise
+ -m,--map <arg>            the main map name to load
+ -P,--chest-damage <arg>   the maximum amount of health a chest can damage
+                           the player
 ```
 
 # Key game code concepts

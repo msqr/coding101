@@ -160,6 +160,12 @@ public class TextQuest {
         ui.draw();
         while (true) {
             KeyStroke keyStroke = screen.readInput();
+
+            // check for death
+            if (player.getHealth() < 1) {
+                return;
+            }
+
             KeyType keyType = keyStroke != null ? keyStroke.getKeyType() : null;
             if (keyType == KeyType.Escape || keyType == KeyType.EOF) {
                 return;
@@ -191,6 +197,10 @@ public class TextQuest {
                     ui.health().draw();
 
                     screen.refresh();
+
+                    if (player.isDead()) {
+                        death(0, bundle.getString("death.terrain"));
+                    }
                 }
                 continue;
             }
@@ -243,12 +253,22 @@ public class TextQuest {
         final int y = player.getY();
         String message = null; // message to show the outcome of interacting with the chest
         if (player.interacted(game.map(), x, y)) {
-            // TODO: open chest and deal with outcome
             int coinsFound = 0;
+            int damageTaken = 0;
+
+            // TODO: open chest and deal with outcome: damage vs coins; decide first if
+            // the chest provides coins or deducts health. Then decide either how many
+            // coins to reward with, or health to deduct from, the player, updating the
+            // coinsFound or damageTaken variables appropriately.
+
             if (coinsFound > 0) {
                 message = MessageFormat.format(bundle.getString("chest.coinsAcquired"), coinsFound);
                 player.addCoins(coinsFound);
                 ui.info().draw();
+            } else if (damageTaken > 0) {
+                message = MessageFormat.format(bundle.getString("chest.damageTaken"), damageTaken);
+                player.deductHealth(damageTaken);
+                ui.health().draw();
             } else {
                 message = bundle.getString("chest.empty");
             }
@@ -263,6 +283,24 @@ public class TextQuest {
         // update coins display
         ui.info().drawCoins();
 
+        screen.refresh();
+
+        // check for death!
+        if (player.getHealth() < 1) {
+            int delay = message != null ? MESSAGE_CLEAR_DELAY : 0;
+            death(delay, bundle.getString("killed.chest"));
+        }
+    }
+
+    private void death(int delay, String message) throws IOException {
+        if (delay > 0) {
+            try {
+                Thread.sleep(delay * 1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        ui.status().drawMessage(message, -1);
         screen.refresh();
     }
 
@@ -330,11 +368,20 @@ public class TextQuest {
     /** The starting coins CLI option. */
     public static final char OPT_COINS = 'c';
 
+    /** The chest coins maximum CLI option. */
+    public static final char OPT_CHEST_COINS_MAX = 'C';
+
+    /** The chest reward factor CLI option. */
+    public static final char OPT_CHEST_REWARD_FACTOR = 'l';
+
+    /** The chest health damage maximum CLI option. */
+    public static final char OPT_CHEST_DAMAGE_MAX = 'P';
+
     /** The color scheme directory CLI option. */
-    public static final char OPT_COLORS_DIR = 'L';
+    public static final char OPT_COLORS_DIR = 'K';
 
     /** The color scheme name CLI option. */
-    public static final char OPT_COLORS_NAME = 'l';
+    public static final char OPT_COLORS_NAME = 'k';
 
     /** The help CLI option. */
     public static final char OPT_HELP = 'h';
@@ -358,6 +405,21 @@ public class TextQuest {
                 .longOpt("coins")
                 .hasArg()
                 .desc("starting number of coins")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_CHEST_COINS_MAX))
+                .longOpt("chest-coins")
+                .hasArg()
+                .desc("maximum number of coins a chest can provide")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_CHEST_REWARD_FACTOR))
+                .longOpt("chest-luck")
+                .hasArg()
+                .desc("a percentage from 1-100 that a chest will reward rather than penalise")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_CHEST_DAMAGE_MAX))
+                .longOpt("chest-damage")
+                .hasArg()
+                .desc("the maximum amount of health a chest can damage the player")
                 .build());
         options.addOption(Option.builder(String.valueOf(OPT_COLORS_DIR))
                 .longOpt("colors-dir")
@@ -514,6 +576,42 @@ public class TextQuest {
                 config = config.withInitialCoins(coins);
             } catch (Exception e) {
                 printErrorAndExit("The --coins argument must be a number 0 or more.");
+            }
+        }
+
+        if (cl.hasOption(OPT_CHEST_COINS_MAX)) {
+            try {
+                int coins = Integer.parseInt(cl.getOptionValue(OPT_CHEST_COINS_MAX));
+                if (coins < 0) {
+                    throw new IllegalArgumentException();
+                }
+                config = config.withChestCoinsMaximum(coins);
+            } catch (Exception e) {
+                printErrorAndExit("The --chest-coins argument must be a number 0 or more.");
+            }
+        }
+
+        if (cl.hasOption(OPT_CHEST_REWARD_FACTOR)) {
+            try {
+                int factor = Integer.parseInt(cl.getOptionValue(OPT_CHEST_REWARD_FACTOR));
+                if (factor < 1 || factor > 100) {
+                    throw new IllegalArgumentException();
+                }
+                config = config.withChestRewardFactor(factor);
+            } catch (Exception e) {
+                printErrorAndExit("The --chest-luck argument must be a number between 1 and 100.");
+            }
+        }
+
+        if (cl.hasOption(OPT_CHEST_DAMAGE_MAX)) {
+            try {
+                int max = Integer.parseInt(cl.getOptionValue(OPT_CHEST_DAMAGE_MAX));
+                if (max < 0) {
+                    throw new IllegalArgumentException();
+                }
+                config = config.withChestHeathDamageMaximum(max);
+            } catch (Exception e) {
+                printErrorAndExit("The --chest-damage argument must be a number greater than 0.");
             }
         }
 

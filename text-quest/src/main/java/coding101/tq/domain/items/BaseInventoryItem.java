@@ -29,6 +29,11 @@ public abstract class BaseInventoryItem implements InventoryItem {
         this.remainingUses = -1;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[type=" + type + ", name=" + name + "]";
+    }
+
     @JsonProperty("type")
     @Override
     public ItemType type() {

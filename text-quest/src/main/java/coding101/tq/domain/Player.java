@@ -194,6 +194,34 @@ public class Player {
     }
 
     /**
+     * Test if the player is dead.
+     *
+     * @return {@code true} if the player's health has reached 0
+     */
+    public boolean isDead() {
+        return health < 1;
+    }
+
+    /**
+     * Add a number of health to the player.
+     *
+     * @param health the health to add
+     */
+    public void addHealth(int health) {
+        int newHealth = this.health + health;
+        setHealth(Math.min(maxHealth, newHealth));
+    }
+
+    /**
+     * Remove a number of health from the player.
+     *
+     * @param health the health to remove
+     */
+    public void deductHealth(int health) {
+        setHealth(this.health - health);
+    }
+
+    /**
      * Get the maximum health the player can have.
      *
      * @return the maximum health
@@ -308,7 +336,7 @@ public class Player {
      * @param coins the coins to add
      */
     public void addCoins(int coins) {
-        setCoins(getCoins() + coins);
+        setCoins(this.coins + coins);
     }
 
     /**
@@ -317,7 +345,7 @@ public class Player {
      * @param coins the coins to remove
      */
     public void deductCoins(int coins) {
-        setCoins(getCoins() - coins);
+        setCoins(this.coins - coins);
     }
 
     /**
@@ -415,8 +443,7 @@ public class Player {
      */
     public boolean interacted(TerrainMap map, int x, int y) {
         assert map != null;
-        // use TreeMap here just for convenience of keeping coordinates sorted for
-        // persistence
+        // use TreeSet here just for convenience of keeping sorted for persistence
         Set<Coordinate> mapInteractions = interactions.computeIfAbsent(map.getName(), k -> new TreeSet<>());
         return mapInteractions.add(new Coordinate(x, y));
     }

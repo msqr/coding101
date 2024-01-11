@@ -199,7 +199,7 @@ public class TextQuest {
                     screen.refresh();
 
                     if (player.isDead()) {
-                        death(0, bundle.getString("death.terrain"));
+                        death(0, bundle.getString("killed.terrain"));
                     }
                 }
                 continue;

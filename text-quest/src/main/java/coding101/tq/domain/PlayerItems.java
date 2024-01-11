@@ -1,17 +1,15 @@
 package coding101.tq.domain;
 
 import coding101.tq.domain.items.InventoryItem;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The player item list.
  */
 public class PlayerItems {
 
-    // TODO: implement field(s) to track the collection of items
-    // TODO: should there be a limit to the number of items?
-    // TODO: should there be a limit to the number of equipped items?
+    private List<InventoryItem> items = new ArrayList<>(5);
 
     /**
      * Constructor.
@@ -21,13 +19,21 @@ public class PlayerItems {
     }
 
     /**
-     * Get a collection of all inventory items.
+     * Get the collection of all inventory items.
      *
-     * @return
+     * @return the items
      */
-    public Collection<InventoryItem> allItems() {
-        // TODO: implement
-        return Collections.emptyList();
+    public List<InventoryItem> getItems() {
+        return items;
+    }
+
+    /**
+     * Set the collection of all inventory items.
+     *
+     * @return the items
+     */
+    public void setItems(List<InventoryItem> items) {
+        this.items = items != null ? items : new ArrayList<>(4);
     }
 
     /**
@@ -86,10 +92,21 @@ public class PlayerItems {
      * If the item can be equipped and the type is a singleton, then any currently
      * equipped item of the same type will be un-equipped first.
      *
-     * @param item the item to equip
+     * @param item   the item to equip
+     * @param player the player to eqip the item on
      */
     public void apply(InventoryItem item, Player player) {
         // TODO: equip or use the item
         // TODO: might have to un-equip an item of same type first
+    }
+
+    /**
+     * Unequip an item, but keep it in the inventory.
+     *
+     * @param item   the item to unequip
+     * @param player the player
+     */
+    public void stash(InventoryItem item, Player player) {
+        // TODO: unequip the item
     }
 }

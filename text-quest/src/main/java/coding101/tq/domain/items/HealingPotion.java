@@ -6,6 +6,7 @@ package coding101.tq.domain.items;
 import coding101.tq.domain.Player;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A potion that restores health.
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A potion can be used only once, and after using it will be automatically
  * removed from the player's inventory.
  */
+@JsonTypeName("HealingPotion")
 public class HealingPotion extends BaseInventoryItem {
 
     private final int amount;
@@ -20,12 +22,13 @@ public class HealingPotion extends BaseInventoryItem {
     /**
      * Constructor.
      *
+     * @param name   the weapon name
      * @param amount the amount of health the potion restores, or a negative number
      *               to restore to full health
      */
     @JsonCreator
-    public HealingPotion(@JsonProperty("amount") int amount) {
-        super(ItemType.Potion, "Healing potion");
+    public HealingPotion(@JsonProperty("name") String name, @JsonProperty("amount") int amount) {
+        super(ItemType.Potion, name);
         this.amount = amount;
     }
 
@@ -36,6 +39,11 @@ public class HealingPotion extends BaseInventoryItem {
      *         that full health is restored
      */
     public int getAmount() {
+        return amount;
+    }
+
+    @Override
+    public int strength() {
         return amount;
     }
 
@@ -57,5 +65,10 @@ public class HealingPotion extends BaseInventoryItem {
         // remove from player inventory
         player.getItems().removeItem(this);
         return true;
+    }
+
+    @Override
+    public boolean stash(Player player) {
+        return false;
     }
 }

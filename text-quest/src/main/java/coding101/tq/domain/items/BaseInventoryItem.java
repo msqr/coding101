@@ -2,9 +2,13 @@ package coding101.tq.domain.items;
 
 import static java.util.Objects.requireNonNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * An abstract {@link InventoryItem}.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 public abstract class BaseInventoryItem implements InventoryItem {
 
     private final ItemType type;
@@ -25,11 +29,13 @@ public abstract class BaseInventoryItem implements InventoryItem {
         this.remainingUses = -1;
     }
 
+    @JsonProperty("type")
     @Override
     public ItemType type() {
         return type;
     }
 
+    @JsonProperty("name")
     @Override
     public String name() {
         return name;

@@ -2,10 +2,12 @@ package coding101.tq.domain.items;
 
 import coding101.tq.domain.Player;
 import coding101.tq.domain.TerrainType;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * An item a player can possess.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
 public interface InventoryItem {
 
     /**
@@ -72,12 +74,38 @@ public interface InventoryItem {
     }
 
     /**
+     * Get the "strength" of the item.
+     *
+     * This method will return {@link #getDefenseOffset()} for {@code Armor} types,
+     * {@link #getOffenseOffset()} for {@code Weapon} types, or 0 otherwise. The
+     * special value {@literal -1} represents "maximum strength", for example a
+     * potion that restores all a player's possible health.
+     *
+     * @return the strength of the item
+     */
+    default int strength() {
+        return switch (type()) {
+            case Armor -> getDefenseOffset();
+            case Weapon -> getOffenseOffset();
+            default -> 0;
+        };
+    }
+
+    /**
      * Equip or use this item on the player.
      *
      * @param player the player to apply the item to
      * @return {@literal true} if the item was equipped or used
      */
     boolean apply(Player player);
+
+    /**
+     * Unequip an item from a player, but keep it in their inventory.
+     *
+     * @param player the player to unequip the item from
+     * @return {@literal true} if the item was stashed
+     */
+    boolean stash(Player player);
 
     /**
      * Test if this item provides immunity to a given terrain type.

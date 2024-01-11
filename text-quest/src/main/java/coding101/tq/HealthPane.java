@@ -50,6 +50,16 @@ public class HealthPane implements Pane {
         return game.screen().getTerminalSize().getColumns() - 1;
     }
 
+    @Override
+    public int width() {
+        return width;
+    }
+
+    @Override
+    public int height() {
+        return height;
+    }
+
     /** The amount of health each display heart represents. */
     public static final int PLAYER_HEALTH_HEART_VALUE = 5;
 

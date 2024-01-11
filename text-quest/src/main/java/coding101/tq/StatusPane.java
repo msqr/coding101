@@ -60,6 +60,11 @@ public class StatusPane implements Pane {
         return game.screen().getTerminalSize().getColumns() - rightOffset;
     }
 
+    @Override
+    public int height() {
+        return height;
+    }
+
     /**
      * Get the message.
      *

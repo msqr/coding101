@@ -111,6 +111,7 @@ usage: <options>
  -m,--map <arg>            the main map name to load
  -P,--chest-damage <arg>   the maximum amount of health a chest can damage
                            the player
+ -r,--reveal-map           make the map completely visible
 ```
 
 # Key game code concepts

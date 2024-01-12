@@ -159,5 +159,5 @@ public class DynamicRandomRange {
 }
 ```
 
-Implement the `randomIntFromZeroTo(max)` method so it returns an `int` value between
-0 and `max`.
+Implement the `randomIntFromZeroTo(max)` method so it returns an `int` value between 0 and `max`.
+Run the program several times to check if it does return values in the given range.

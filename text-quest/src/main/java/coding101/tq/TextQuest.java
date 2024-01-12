@@ -253,6 +253,7 @@ public class TextQuest {
         final int y = player.getY();
         String message = null; // message to show the outcome of interacting with the chest
         if (player.interacted(game.map(), x, y)) {
+            final GameConfiguration config = player.config();
             int coinsFound = 0;
             int damageTaken = 0;
 

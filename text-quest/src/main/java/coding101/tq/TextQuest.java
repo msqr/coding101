@@ -1,11 +1,14 @@
 package coding101.tq;
 
+import static coding101.tq.util.CommandLineGameConfiguration.printErrorAndExit;
+
 import coding101.tq.domain.ColorScheme;
 import coding101.tq.domain.Player;
 import coding101.tq.domain.Settings;
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.domain.TerrainType;
 import coding101.tq.util.BitSetJson;
+import coding101.tq.util.CommandLineGameConfiguration;
 import coding101.tq.util.CoordinateJson;
 import coding101.tq.util.Persistence;
 import coding101.tq.util.PlayerItemsJson;
@@ -24,11 +27,9 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -39,7 +40,6 @@ import java.util.regex.Matcher;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
@@ -366,90 +366,6 @@ public class TextQuest {
         screen.refresh();
     }
 
-    /** The starting coins CLI option. */
-    public static final char OPT_COINS = 'c';
-
-    /** The chest coins maximum CLI option. */
-    public static final char OPT_CHEST_COINS_MAX = 'C';
-
-    /** The chest reward factor CLI option. */
-    public static final char OPT_CHEST_REWARD_FACTOR = 'l';
-
-    /** The chest health damage maximum CLI option. */
-    public static final char OPT_CHEST_DAMAGE_MAX = 'P';
-
-    /** The color scheme directory CLI option. */
-    public static final char OPT_COLORS_DIR = 'K';
-
-    /** The color scheme name CLI option. */
-    public static final char OPT_COLORS_NAME = 'k';
-
-    /** The help CLI option. */
-    public static final char OPT_HELP = 'h';
-
-    /** The map root directory path CLI option. */
-    public static final char OPT_MAIN_MAP_DIR = 'd';
-
-    /** The main map name CLI option. */
-    public static final char OPT_MAIN_MAP_NAME = 'm';
-
-    /** The game save file path CLI option. */
-    public static final char OPT_SAVE_PATH = 'f';
-
-    private static Options cliOptions() {
-        Options options = new Options();
-        options.addOption(Option.builder(String.valueOf(OPT_HELP))
-                .longOpt("help")
-                .desc("show usage information")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_COINS))
-                .longOpt("coins")
-                .hasArg()
-                .desc("starting number of coins")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_CHEST_COINS_MAX))
-                .longOpt("chest-coins")
-                .hasArg()
-                .desc("maximum number of coins a chest can provide")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_CHEST_REWARD_FACTOR))
-                .longOpt("chest-luck")
-                .hasArg()
-                .desc("a percentage from 1-100 that a chest will reward rather than penalise")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_CHEST_DAMAGE_MAX))
-                .longOpt("chest-damage")
-                .hasArg()
-                .desc("the maximum amount of health a chest can damage the player")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_COLORS_DIR))
-                .longOpt("colors-dir")
-                .hasArg()
-                .desc("the colors directory path")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_COLORS_NAME))
-                .longOpt("colors")
-                .hasArg()
-                .desc("the colors name to load")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_MAIN_MAP_DIR))
-                .longOpt("map-dir")
-                .hasArg()
-                .desc("the main map directory path")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_MAIN_MAP_NAME))
-                .longOpt("map")
-                .hasArg()
-                .desc("the main map name to load")
-                .build());
-        options.addOption(Option.builder(String.valueOf(OPT_SAVE_PATH))
-                .longOpt("save-file")
-                .hasArg()
-                .desc("the save file path to use")
-                .build());
-        return options;
-    }
-
     private static void printHelp(Options options) {
         HelpFormatter help = new HelpFormatter();
         StringBuilder banner = new StringBuilder();
@@ -465,14 +381,8 @@ public class TextQuest {
         help.printHelp("<options>", banner.toString(), options, null);
     }
 
-    private static void printErrorAndExit(String msg) {
-        System.err.println(msg);
-        System.err.println("Pass --help for command line argument help.");
-        System.exit(1);
-    }
-
     private static CommandLine commandLine(String[] args) {
-        Options opts = cliOptions();
+        Options opts = CommandLineGameConfiguration.cliOptions();
         try {
             return DefaultParser.builder()
                     .setStripLeadingAndTrailingQuotes(true)
@@ -486,66 +396,12 @@ public class TextQuest {
         return null;
     }
 
-    private static TerrainMap map(CommandLine cl) {
-        // load main map
-        String mapPath = "META-INF/tqmaps";
-        if (cl.hasOption(OPT_MAIN_MAP_DIR)) {
-            mapPath = cl.getOptionValue(OPT_MAIN_MAP_DIR);
-        }
-        String mapName = "main";
-        if (cl.hasOption(OPT_MAIN_MAP_NAME)) {
-            mapName = cl.getOptionValue(OPT_MAIN_MAP_NAME);
-        }
-        try {
-            return TerrainMapBuilder.parseResources("%s/%s".formatted(mapPath, mapName))
-                    .build(mapName);
-        } catch (IllegalArgumentException e) {
-            printErrorAndExit(e.getMessage());
-            return null;
-        }
-    }
-
-    private static ColorScheme colors(CommandLine cl, ObjectMapper mapper) {
-        // load color scheme
-        String colorSchemeDir = "META-INF/tqcolors";
-        if (cl.hasOption(OPT_COLORS_DIR)) {
-            colorSchemeDir = cl.getOptionValue(OPT_COLORS_DIR);
-        }
-        String colorScheme = "default";
-        if (cl.hasOption(OPT_COLORS_NAME)) {
-            colorScheme = cl.getOptionValue(OPT_COLORS_NAME);
-        }
-        InputStream in = TextQuest.class
-                .getClassLoader()
-                .getResourceAsStream("%s/%s.json".formatted(colorSchemeDir, colorScheme));
-        try {
-            if (in == null) {
-                // try as file path
-                in = Files.newInputStream(Paths.get(colorSchemeDir, colorScheme));
-            }
-            return mapper.readValue(in, ColorScheme.class);
-        } catch (NoSuchFileException e) {
-            printErrorAndExit("Color scheme file %s not found!".formatted(colorScheme));
-        } catch (IOException e) {
-            printErrorAndExit("Error reading color scheme %s: %s".formatted(colorScheme, e.getMessage()));
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-        }
-        return null;
-    }
-
     public static void main(String[] args) {
         // parse arguments
         CommandLine cl = commandLine(args);
 
-        if (cl.hasOption(OPT_HELP)) {
-            printHelp(cliOptions());
+        if (cl.hasOption(CommandLineGameConfiguration.OPT_HELP)) {
+            printHelp(CommandLineGameConfiguration.cliOptions());
             System.exit(0);
         }
 
@@ -559,68 +415,20 @@ public class TextQuest {
         mapper.registerSubtypes(PlayerItemsJson.itemSubTypes());
 
         // load main map
-        TerrainMap mainMap = map(cl);
+        TerrainMap mainMap = CommandLineGameConfiguration.map(cl);
 
         // create game settings
-        ColorScheme colors = colors(cl, mapper);
+        ColorScheme colors = CommandLineGameConfiguration.colors(cl, mapper);
         Settings settings = new Settings(colors);
 
         // create game configuration
-        GameConfiguration config = GameConfiguration.DEFAULTS;
-
-        if (cl.hasOption(OPT_COINS)) {
-            try {
-                int coins = Integer.parseInt(cl.getOptionValue(OPT_COINS));
-                if (coins < 0) {
-                    throw new IllegalArgumentException();
-                }
-                config = config.withInitialCoins(coins);
-            } catch (Exception e) {
-                printErrorAndExit("The --coins argument must be a number 0 or more.");
-            }
-        }
-
-        if (cl.hasOption(OPT_CHEST_COINS_MAX)) {
-            try {
-                int coins = Integer.parseInt(cl.getOptionValue(OPT_CHEST_COINS_MAX));
-                if (coins < 0) {
-                    throw new IllegalArgumentException();
-                }
-                config = config.withChestCoinsMaximum(coins);
-            } catch (Exception e) {
-                printErrorAndExit("The --chest-coins argument must be a number 0 or more.");
-            }
-        }
-
-        if (cl.hasOption(OPT_CHEST_REWARD_FACTOR)) {
-            try {
-                int factor = Integer.parseInt(cl.getOptionValue(OPT_CHEST_REWARD_FACTOR));
-                if (factor < 1 || factor > 100) {
-                    throw new IllegalArgumentException();
-                }
-                config = config.withChestRewardFactor(factor);
-            } catch (Exception e) {
-                printErrorAndExit("The --chest-luck argument must be a number between 1 and 100.");
-            }
-        }
-
-        if (cl.hasOption(OPT_CHEST_DAMAGE_MAX)) {
-            try {
-                int max = Integer.parseInt(cl.getOptionValue(OPT_CHEST_DAMAGE_MAX));
-                if (max < 0) {
-                    throw new IllegalArgumentException();
-                }
-                config = config.withChestHeathDamageMaximum(max);
-            } catch (Exception e) {
-                printErrorAndExit("The --chest-damage argument must be a number greater than 0.");
-            }
-        }
+        GameConfiguration config = CommandLineGameConfiguration.parseConfiguration(cl);
 
         // create player
         Player player = null;
         Path save = Paths.get("game.tqsave");
-        if (cl.hasOption(OPT_SAVE_PATH)) {
-            save = Paths.get(cl.getOptionValue(OPT_SAVE_PATH));
+        if (cl.hasOption(CommandLineGameConfiguration.OPT_SAVE_PATH)) {
+            save = Paths.get(cl.getOptionValue(CommandLineGameConfiguration.OPT_SAVE_PATH));
         }
         if (Files.isReadable(save)) {
             try {

@@ -108,7 +108,9 @@ public final class MapPane implements Pane {
         if (screenCol < left() || screenCol > right() || screenRow < top() || screenRow > bottom()) {
             return;
         }
-        final boolean visited = game.player().hasVisitedNear(game.map(), x, y);
+        // show the terrain if the revealMap config active, or if visited "near"
+        final boolean visited =
+                game.player().config().revealMap() || game.player().hasVisitedNear(game.map(), x, y);
         char c = t != null ? t.getKey() : TerrainType.EMPTY;
         TextColor bg = game.settings().colors().background().terrain(t, ANSI.BLACK);
         TextColor fg = game.settings().colors().foreground().terrain(t, ANSI.WHITE_BRIGHT);

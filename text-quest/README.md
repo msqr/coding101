@@ -634,4 +634,5 @@ Here are the goals of this coding challenge:
 
  1. [Death by lava](./README-G1.md) (walk on lava)
  2. [Hitting a wall](./README-G2.md) (fix movement)
- 3. [Risky business](./README-G3.md) (oh but I digress)
+ 3. [Randomness](./README-G3.md) (oh but I digress)
+ 4. [Risky business](./README-G4.md) (opening chests)

@@ -22,15 +22,15 @@ which the randomness can be obtained.
 
 In Java the `Math.random()` method is a **low-quality** and fast method for generating random
 **double** values. It returns a pseudorandom number in the range **>= 0.0 and  <1.0**. It turns out
-having a random value beween 0 and 1 is quite useful, as you can think of this as similar to
-**random fraction**.
+having a random value beween 0 and 1 is quite useful, as you can think of this as being a **random
+fraction**.
 
-> :bulb: In Java the `float` and `double` types represent **floating-point number** values. A 
-> _floating point_ number is a number with a decimal point, like `1.23`, as opposed to the
-> `int` and `long` types that can only hold whole integer values like `1`, `2`, and `3`. The
-> difference between `float` and `double` is the possible range of values the type can hold.
-> The `float` value is smaller and less precise than `double`. Similarly `int` has a smaller
-> range of possible values it can hold versus `long`.
+> :bulb: In Java the `float` and `double` types represent **floating-point number** values. A
+> _floating point_ number is a number with a decimal point, like `1.23`, as opposed to the `int` and
+> `long` types that can only hold whole integer values like `1`, `2`, and `3`. The difference
+> between `float` and `double` is the possible range of values the type can hold. The `float` value
+> is smaller and less precise than `double`. Similarly `int` has a smaller range of possible values
+> it can hold versus `long`.
 
 Imagine playing a coin toss game, where you toss a coin into the air and try to guess which side
 will land facing up: **heads** or **tails**. You have a 50% chance of guessing the outcome, because
@@ -77,9 +77,10 @@ public class CoinToss {
 }
 ```
 
-If you run this program, you'll be able to type <kbd>t</kbd> or <kbd>h</kbd>, followed by <kbd>⏎ Enter</kbd>,
-to guess the outcome, and then a random number `rand` is generated and the result treated as **tails** if
-`rand` is less than 0.5, or **heads** of greater than or equal to 0.5. An example output looks like this:
+If you run this program, you'll be able to type <kbd>t</kbd> or <kbd>h</kbd>, followed by <kbd>⏎
+Enter</kbd>, to guess the outcome, and then a random number `rand` is generated and the result
+treated as **tails** if `rand` is less than 0.5, or **heads** of greater than or equal to 0.5. An
+example output looks like this:
 
 ```
 Heads or tails? (h or t): h
@@ -95,8 +96,8 @@ Random number is: 0.07050406231376127
 Oops, it was tails. Try again!
 ```
 
-> :question: The code tests for `rand < 0.5` and then `rand >= 0.5`. Why less-than in the first case,
-> and then greater-than-or-equal in the second?
+> :question: The code tests for `rand < 0.5` and then `rand >= 0.5`. Why less-than in the first
+> case, and then greater-than-or-equal in the second?
 
 ## Random range
 
@@ -126,9 +127,9 @@ to a nice integer to get whole integers between 0 and `chestCoinMaximum`. For ex
 | 0.8           | 10                 | `0.8 × 10` | 8.0 | 8 |
 | 0.99999999    | 10                 | `0.99999999 × 10` | 9.99999999 | 10 |
 
-In Java the `Math.random()` method can round a `double` value into a `long` value. When you
-only want an `int` you can **cast** a `long` into an `int` by adding `(int)` in front of
-the value you want to affect, like this:
+In Java the `Math.random()` method can round a `double` value into a `long` value. When you only
+want an `int` you can **cast** a `long` into an `int` by adding `(int)` in front of the value you
+want to affect, like this:
 
 ```java
 int n = (int)Math.round(1.23); // cast the long returned by round() to int
@@ -137,9 +138,9 @@ int n = (int)Math.round(1.23); // cast the long returned by round() to int
 
 ## Exercise: random range
 
-The [`DynamicRandomRange`](./src/test/java/coding101/tq/example/DynamicRandomRange.java) class
-is a partially implemented program that accepts a single integer number argument and then
-should print out 10 random numbers between 0 and that argument.
+The [`DynamicRandomRange`](./src/test/java/coding101/tq/example/DynamicRandomRange.java) class is a
+partially implemented program that accepts a single integer number argument and then should print
+out 10 random numbers between 0 and that argument.
 
 ```java
 public class DynamicRandomRange {

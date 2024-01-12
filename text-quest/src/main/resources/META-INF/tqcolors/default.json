@@ -15,6 +15,7 @@
 		"mountain":      "#999999",
 		"sand":          "#C79361",
 		"ship":          "#C79361",
+    "shop":          "#FEFF55",
 		"town":          "#FEFF55",
 		"wall":          "Black",
 		"water":         "#0000AA"
@@ -35,6 +36,7 @@
 		"mountain":      "#FFFFFF",
 		"sand":          "#EFB219",
 		"ship":          "#000000",
+		"shop":          "#AA5500",
 		"town":          "#AA5500",
 		"wall":          "DarkGray",
 		"water":         "#5655FF"

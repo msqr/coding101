@@ -214,6 +214,7 @@ public class TextQuest {
                         case Cave -> interactWithCave();
                         case Chest -> interactWithChest();
                         case Ship, Water -> interactWithShip();
+                        case Town -> interactWithTown();
                         default -> {
                             // nothing to do
                         }
@@ -246,6 +247,11 @@ public class TextQuest {
             }
         }
         ui.draw(ui.map());
+    }
+
+    private void interactWithTown() {
+        // treat town the same as a cave... jump to new map
+        interactWithCave();
     }
 
     private void interactWithChest() throws IOException {

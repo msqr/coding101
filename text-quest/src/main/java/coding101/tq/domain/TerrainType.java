@@ -29,6 +29,8 @@ public enum TerrainType {
 
     Ship(TerrainType.SHIP),
 
+    Shop(TerrainType.SHOP),
+
     Town(TerrainType.TOWN),
 
     WallHorizontal(TerrainType.WALL_HORIZONTAL),
@@ -51,6 +53,7 @@ public enum TerrainType {
     public static final char MOUNTAIN = 'A';
     public static final char SAND = ',';
     public static final char SHIP = '&';
+    public static final char SHOP = '$';
     public static final char TOWN = '*';
     public static final char WATER = '~';
 
@@ -95,6 +98,7 @@ public enum TerrainType {
             case MOUNTAIN -> Mountain;
             case SAND -> Sand;
             case SHIP -> Ship;
+            case SHOP -> Shop;
             case TOWN -> Town;
             case WALL_CORNER -> WallCorner;
             case WALL_HORIZONTAL -> WallHorizontal;

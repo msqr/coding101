@@ -50,6 +50,7 @@ The map is composed of the following symbols:
 | `A`    | mountain |
 | `,`    | sand |
 | `&`    | ship |
+| `$`    | shop |
 | `*`    | town |
 | `~`    | water |
 

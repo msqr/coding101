@@ -25,6 +25,7 @@ public record ColorPalette(
         String mountain,
         String sand,
         String ship,
+        String shop,
         String town,
         String wall,
         String water) {
@@ -113,6 +114,7 @@ public record ColorPalette(
             case Mountain -> color(mountain(), defaultColor);
             case Sand -> color(sand(), defaultColor);
             case Ship -> color(ship(), defaultColor);
+            case Shop -> color(shop(), defaultColor);
             case Town -> color(town(), defaultColor);
             case WallCorner, WallHorizontal, WallVertical -> color(wall(), defaultColor);
             case Water -> color(water(), defaultColor);

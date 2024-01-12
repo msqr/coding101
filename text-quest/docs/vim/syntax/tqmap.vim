@@ -21,6 +21,7 @@ syn match tqMountainComment 	/\<A\>/
 syn match tqTownComment		/\s\*\s/hs=s+1,he=e-1
 syn match tqSandComment		/\s,\s/hs=s+1,he=e-1
 syn match tqShipComment		/\s[&]\s/hs=s+1,he=e-1
+syn match tqShopComment		/\s[$]\s/hs=s+1,he=e-1
 syn match tqWaterComment	/\s\~\s/hs=s+1,he=e-1
 
 syn match tqCave	/O/
@@ -32,10 +33,11 @@ syn match tqLavaRock	/["]/
 syn match tqMountain 	/A/
 syn match tqSand	/,/
 syn match tqShip	/[&]/
+syn match tqShop	/[$]/
 syn match tqTown	/\*/
 syn match tqWater	/\~/
 
-syn region tqComment start="^#" skip="\\$" end="$" keepend contains=@tqCommentGrp,@Spell,tqCaveComment,tqForestComment,tqGrassComment,tqLavaComment,tqLavaRockComment,tqHillComment,tqMountainComment,tqSandComment,tqShipComment,tqTownComment,tqWaterComment
+syn region tqComment start="^#" skip="\\$" end="$" keepend contains=@tqCommentGrp,@Spell,tqCaveComment,tqForestComment,tqGrassComment,tqLavaComment,tqLavaRockComment,tqHillComment,tqMountainComment,tqSandComment,tqShipComment,tqShopComment,tqTownComment,tqWaterComment
 
 if version >= 508 || !exists("did_proto_syn_inits")
   if version < 508
@@ -63,6 +65,8 @@ if version >= 508 || !exists("did_proto_syn_inits")
   HiLink tqSandComment		Sand
   HiLink tqShip			Ship
   HiLink tqShipComment		Ship
+  HiLink tqShop			Shop
+  HiLink tqShopComment		Shop
   HiLink tqTown			Town
   HiLink tqTownComment		Town
   HiLink tqWater		Water

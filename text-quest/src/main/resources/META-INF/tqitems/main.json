@@ -1,0 +1,22 @@
+{
+  "items":[
+    {
+      "@type": "Armor",
+      "name": "Leather",
+      "minimumXp": 0,
+      "defenseOffset": "5"
+    },
+    {
+      "@type": "Armor",
+      "name": "Chain mail",
+      "minimumXp": 1000,
+      "defenseOffset": "10"
+    },
+    {
+      "@type": "Armor",
+      "name": "Plate",
+      "minimumXp": 5000,
+      "defenseOffset": "20"
+    }
+  ]
+}

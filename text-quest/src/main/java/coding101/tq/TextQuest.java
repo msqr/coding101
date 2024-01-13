@@ -4,6 +4,7 @@ import static coding101.tq.util.CommandLineGameConfiguration.printErrorAndExit;
 
 import coding101.tq.domain.ColorScheme;
 import coding101.tq.domain.Player;
+import coding101.tq.domain.PlayerItems;
 import coding101.tq.domain.Settings;
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.domain.TerrainType;
@@ -444,7 +445,8 @@ public class TextQuest {
 
         // create game settings
         ColorScheme colors = CommandLineGameConfiguration.colors(cl, mapper);
-        Settings settings = new Settings(colors);
+        PlayerItems items = CommandLineGameConfiguration.items(cl, mapper);
+        Settings settings = new Settings(colors, items);
 
         // create game configuration
         GameConfiguration config = CommandLineGameConfiguration.parseConfiguration(cl);

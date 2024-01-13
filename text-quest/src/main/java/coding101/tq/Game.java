@@ -1,6 +1,7 @@
 package coding101.tq;
 
 import coding101.tq.domain.Player;
+import coding101.tq.domain.PlayerItems;
 import coding101.tq.domain.Settings;
 import coding101.tq.domain.TerrainMap;
 import com.googlecode.lanterna.graphics.TextGraphics;
@@ -40,6 +41,15 @@ public interface Game {
      * @return the settings
      */
     Settings settings();
+
+    /**
+     * Get all possible game items.
+     *
+     * @return the game items
+     */
+    default PlayerItems items() {
+        return settings().items();
+    }
 
     /**
      * Get the current player.

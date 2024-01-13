@@ -106,6 +106,8 @@ usage: <options>
  -f,--save-file <arg>      the save file path to use
  -g,--gui                  use the image texture GUI renderer
  -h,--help                 show usage information
+ -I,--items-dir <arg>      the items directory path
+ -i,--items <arg>          the items name to load
  -K,--colors-dir <arg>     the colors directory path
  -k,--colors <arg>         the colors name to load
  -l,--chest-luck <arg>     a percentage from 1-100 that a chest will

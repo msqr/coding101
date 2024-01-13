@@ -104,6 +104,7 @@ usage: <options>
  -C,--chest-coins <arg>    maximum number of coins a chest can provide
  -d,--map-dir <arg>        the main map directory path
  -f,--save-file <arg>      the save file path to use
+ -g,--gui                  use the image texture GUI renderer
  -h,--help                 show usage information
  -K,--colors-dir <arg>     the colors directory path
  -k,--colors <arg>         the colors name to load
@@ -113,6 +114,7 @@ usage: <options>
  -P,--chest-damage <arg>   the maximum amount of health a chest can damage
                            the player
  -r,--reveal-map           make the map completely visible
+ -x,--xp <arg>             starting experience points
 ```
 
 # Key game code concepts

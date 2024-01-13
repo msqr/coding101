@@ -23,12 +23,16 @@ public class HealingPotion extends BaseInventoryItem {
      * Constructor.
      *
      * @param name   the weapon name
+     * @param minimumXp the minimum experience points required to use
      * @param amount the amount of health the potion restores, or a negative number
      *               to restore to full health
      */
     @JsonCreator
-    public HealingPotion(@JsonProperty("name") String name, @JsonProperty("amount") int amount) {
-        super(ItemType.Potion, name);
+    public HealingPotion(
+            @JsonProperty("name") String name,
+            @JsonProperty("minimumXp") int minimumXp,
+            @JsonProperty("amount") int amount) {
+        super(ItemType.Potion, name, minimumXp);
         this.amount = amount;
     }
 

@@ -25,6 +25,15 @@ public interface InventoryItem {
     ItemType type();
 
     /**
+     * Get the minimum experience points required for a player to use.
+     *
+     * @return the minimum experience points required
+     */
+    default int minimumXp() {
+        return 0;
+    }
+
+    /**
      * Test if the item can be equipped (activated) on the player, such as a piece
      * of armor or a weapon.
      *

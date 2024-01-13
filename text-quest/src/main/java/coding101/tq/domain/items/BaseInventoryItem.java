@@ -13,6 +13,7 @@ public abstract class BaseInventoryItem implements InventoryItem {
 
     private final ItemType type;
     private final String name;
+    private final int minimumXp;
     private int remainingUses;
 
     /**
@@ -20,12 +21,14 @@ public abstract class BaseInventoryItem implements InventoryItem {
      *
      * @param name the item name
      * @param type the item type
+     * @param minimumXp the minimum experience points required to use
      * @throws IllegalArgumentException if any argument is {@code null}
      */
-    public BaseInventoryItem(ItemType type, String name) {
+    public BaseInventoryItem(ItemType type, String name, int minimumXp) {
         super();
         this.type = requireNonNull(type);
         this.name = requireNonNull(name);
+        this.minimumXp = minimumXp;
         this.remainingUses = -1;
     }
 
@@ -44,6 +47,12 @@ public abstract class BaseInventoryItem implements InventoryItem {
     @Override
     public String name() {
         return name;
+    }
+
+    @JsonProperty("minimumXp")
+    @Override
+    public int minimumXp() {
+        return this.minimumXp;
     }
 
     @Override

@@ -14,9 +14,10 @@ public abstract class BaseEquipableInventoryItem extends BaseInventoryItem {
      *
      * @param type the item type
      * @param name the item name
+     * @param minimumXp the minimum experience points required to use
      */
-    public BaseEquipableInventoryItem(ItemType type, String name) {
-        super(type, name);
+    public BaseEquipableInventoryItem(ItemType type, String name, int minimumXp) {
+        super(type, name, minimumXp);
     }
 
     @Override

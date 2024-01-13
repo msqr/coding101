@@ -40,7 +40,7 @@ public class VisitedMap {
         BitSet row = visitedRows.computeIfAbsent(y, BitSet::new);
         boolean result = row.get(x);
         row.set(x);
-        return result;
+        return !result;
     }
 
     /**

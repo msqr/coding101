@@ -22,6 +22,7 @@ public class Player {
     private int y;
     private Coordinate onboard; // the map coordinate of the boarded vehicle
     private int coins;
+    private int xp;
     private final PlayerItems items = new PlayerItems();
     private Map<String, VisitedMap> visitedMaps = new HashMap<>(2);
     private Map<String, Set<Coordinate>> interactions = new HashMap<>(16);
@@ -49,6 +50,7 @@ public class Player {
         this.coins = config.initialCoins();
         this.health = config.initialHealth();
         this.maxHealth = config.initialMaxHealth();
+        this.xp = config.xp().iniialXp();
     }
 
     /**
@@ -315,7 +317,7 @@ public class Player {
     /**
      * Get the number of coins the player owns.
      *
-     * @return the coins the coins
+     * @return the coins the player owns
      */
     public int getCoins() {
         return coins;
@@ -346,6 +348,33 @@ public class Player {
      */
     public void deductCoins(int coins) {
         setCoins(this.coins - coins);
+    }
+
+    /**
+     * Get the experience points the player has.
+     *
+     * @return the experience points the player has
+     */
+    public int getXp() {
+        return xp;
+    }
+
+    /**
+     * Set the number of experience points the player has.
+     *
+     * @param xp the experience points to set
+     */
+    public void setXp(int xp) {
+        this.xp = Math.max(0, xp);
+    }
+
+    /**
+     * Add a number of experience points to the player.
+     *
+     * @param coins the experience points to add
+     */
+    public void addXp(int xp) {
+        setXp(this.xp + xp);
     }
 
     /**

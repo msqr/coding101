@@ -66,8 +66,9 @@ public final class MapPane implements Pane {
      *
      * @param newX the new X position
      * @param newY the new Y position
+     * @return {@code true} if visiting the coordinate for the first time
      */
-    public void movePlayer(int newX, int newY) {
+    public boolean movePlayer(int newX, int newY) {
         // draw old position terrain
         final int paneWidth = width();
         final int paneHeight = height();
@@ -79,7 +80,7 @@ public final class MapPane implements Pane {
         final int newStartX = (newX / paneWidth) * paneWidth;
         final int newStartY = (newY / paneHeight) * paneHeight;
 
-        game.player().moveTo(game.map(), newX, newY);
+        boolean result = game.player().moveTo(game.map(), newX, newY);
 
         if (newStartX != startX || newStartY != startY) {
             // redraw entire map
@@ -90,6 +91,7 @@ public final class MapPane implements Pane {
             });
         }
         drawPlayer(game.player());
+        return result;
     }
 
     private void drawMapForPoint(TerrainMap map, int x, int y) {

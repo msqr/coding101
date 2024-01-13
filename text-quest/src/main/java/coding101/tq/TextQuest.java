@@ -191,7 +191,10 @@ public class TextQuest {
             if ((newX != player.getX() || newY != player.getY()) && player.canMoveTo(activeMap, newX, newY)) {
                 // move player
                 if (newX >= 0 && newY >= 0 && newX < activeMap.width() && newY < activeMap.height()) {
-                    ui.map().movePlayer(newX, newY);
+                    if (ui.map().movePlayer(newX, newY)) {
+                        // moved to new coordinate; add XP
+                        player.addXp(player.config().xp().exploreXp());
+                    }
 
                     // redraw health in case that changed
                     ui.health().draw();
@@ -280,6 +283,9 @@ public class TextQuest {
             } else {
                 message = bundle.getString("chest.empty");
             }
+
+            // earn XP
+            player.addXp(config.xp().chestXp());
         } else {
             // show message that chest has already been opened
             message = bundle.getString("chest.alreadyOpened");

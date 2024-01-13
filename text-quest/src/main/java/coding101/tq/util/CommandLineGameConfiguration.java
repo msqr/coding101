@@ -56,6 +56,9 @@ public final class CommandLineGameConfiguration {
     /** The GUI flag option. */
     public static final char OPT_GUI = 'g';
 
+    /** The experience points option. */
+    public static final char OPT_XP = 'x';
+
     private CommandLineGameConfiguration() {
         // not available
     }
@@ -101,6 +104,11 @@ public final class CommandLineGameConfiguration {
                 .longOpt("chest-damage")
                 .hasArg()
                 .desc("the maximum amount of health a chest can damage the player")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_XP))
+                .longOpt("xp")
+                .hasArg()
+                .desc("starting experience points")
                 .build());
         options.addOption(Option.builder(String.valueOf(OPT_COLORS_DIR))
                 .longOpt("colors-dir")
@@ -259,7 +267,19 @@ public final class CommandLineGameConfiguration {
                 }
                 config = config.withChestHeathDamageMaximum(max);
             } catch (Exception e) {
-                printErrorAndExit("The --chest-damage argument must be a number greater than 0.");
+                printErrorAndExit("The --chest-damage argument must be a number 0 or more.");
+            }
+        }
+
+        if (cl.hasOption(OPT_XP)) {
+            try {
+                int xp = Integer.parseInt(cl.getOptionValue(OPT_XP));
+                if (xp < 0) {
+                    throw new IllegalArgumentException();
+                }
+                config = config.withInitialXp(xp);
+            } catch (Exception e) {
+                printErrorAndExit("The --xp argument must be a number 0 or more.");
             }
         }
 

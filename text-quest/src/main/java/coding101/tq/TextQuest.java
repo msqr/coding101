@@ -402,6 +402,14 @@ public class TextQuest {
         return null;
     }
 
+    private static Terminal createTerminal(GameConfiguration config) throws IOException {
+        DefaultTerminalFactory tf = new DefaultTerminalFactory();
+        if (config.gui()) {
+            return tf.createTerminalEmulator();
+        }
+        return tf.createTerminal();
+    }
+
     public static void main(String[] args) {
         // parse arguments
         CommandLine cl = commandLine(args);
@@ -451,7 +459,7 @@ public class TextQuest {
         // free CommandLine
         cl = null;
 
-        try (Terminal terminal = new DefaultTerminalFactory().createTerminal()) {
+        try (Terminal terminal = createTerminal(config)) {
             TerminalSize screenSize = terminal.getTerminalSize();
             if (screenSize.getColumns() < 30 || screenSize.getRows() < 10) {
                 printErrorAndExit("Terminal must be at least 30x10.");

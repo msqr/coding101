@@ -22,6 +22,7 @@ package coding101.tq;
  *                                 player; default 5
  * @param revealMap                show the map, regardless if visited; defaults
  *                                 to false
+ * @param gui                      use the texture image renderer
  */
 public record GameConfiguration(
         int initialCoins,
@@ -32,10 +33,12 @@ public record GameConfiguration(
         int chestRewardFactor,
         int chestCoinsMaximum,
         int chestHealthDamageMaximum,
-        boolean revealMap) {
+        boolean revealMap,
+        boolean gui) {
 
     /** The default game configuration. */
-    public static final GameConfiguration DEFAULTS = new GameConfiguration(20, 30, 30, 100, 5, 100, 50, 5, false);
+    public static final GameConfiguration DEFAULTS =
+            new GameConfiguration(20, 30, 30, 100, 5, 100, 50, 5, false, false);
 
     /**
      * Get a new configuration with a specific number of initial coins.
@@ -53,7 +56,8 @@ public record GameConfiguration(
                 chestCoinsMaximum,
                 chestRewardFactor,
                 chestHealthDamageMaximum,
-                revealMap);
+                revealMap,
+                gui);
     }
 
     /**
@@ -72,7 +76,8 @@ public record GameConfiguration(
                 chestCoinsMaximum,
                 chestRewardFactor,
                 chestHealthDamageMaximum,
-                revealMap);
+                revealMap,
+                gui);
     }
 
     /**
@@ -92,7 +97,8 @@ public record GameConfiguration(
                 chestCoinsMaximum,
                 chestRewardFactor,
                 chestHealthDamageMaximum,
-                revealMap);
+                revealMap,
+                gui);
     }
 
     /**
@@ -112,7 +118,8 @@ public record GameConfiguration(
                 chestCoinsMaximum,
                 chestRewardFactor,
                 chestHealthDamageMaximum,
-                revealMap);
+                revealMap,
+                gui);
     }
 
     /**
@@ -131,6 +138,27 @@ public record GameConfiguration(
                 chestCoinsMaximum,
                 chestRewardFactor,
                 chestHealthDamageMaximum,
-                revealMap);
+                revealMap,
+                gui);
+    }
+
+    /**
+     * Get a new configuration with a specific GUI flag.
+     *
+     * @param gui true to use the texture image renderer
+     * @return the new configuration
+     */
+    public GameConfiguration withGui(boolean gui) {
+        return new GameConfiguration(
+                initialCoins,
+                initialHealth,
+                initialMaxHealth,
+                maxPossibleHealth,
+                lavaHealthDamage,
+                chestCoinsMaximum,
+                chestRewardFactor,
+                chestHealthDamageMaximum,
+                revealMap,
+                gui);
     }
 }

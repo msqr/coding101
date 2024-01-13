@@ -53,6 +53,9 @@ public final class CommandLineGameConfiguration {
     /** The "reveal map" flag CLI option. */
     public static final char OPT_REVEAL_MAP = 'r';
 
+    /** The GUI flag option. */
+    public static final char OPT_GUI = 'g';
+
     private CommandLineGameConfiguration() {
         // not available
     }
@@ -127,6 +130,10 @@ public final class CommandLineGameConfiguration {
         options.addOption(Option.builder(String.valueOf(OPT_REVEAL_MAP))
                 .longOpt("reveal-map")
                 .desc("make the map completely visible")
+                .build());
+        options.addOption(Option.builder(String.valueOf(OPT_GUI))
+                .longOpt("gui")
+                .desc("use the image texture GUI renderer")
                 .build());
         return options;
     }
@@ -258,6 +265,10 @@ public final class CommandLineGameConfiguration {
 
         if (cl.hasOption(OPT_REVEAL_MAP)) {
             config = config.withRevealMap(true);
+        }
+
+        if (cl.hasOption(OPT_GUI)) {
+            config = config.withGui(true);
         }
 
         return config;

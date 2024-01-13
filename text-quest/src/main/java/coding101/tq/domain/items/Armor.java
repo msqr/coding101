@@ -15,16 +15,18 @@ public class Armor extends BaseEquipableInventoryItem {
     /**
      * Constructor.
      *
-     * @param name   the armor name
+     * @param name      the armor name
      * @param minimumXp the minimum experience points required to use
-     * @param amount the amount of defense the armor adds
+     * @param price     the price to purchase, in coins
+     * @param amount    the amount of defense the armor adds
      */
     @JsonCreator
     public Armor(
             @JsonProperty("name") String name,
             @JsonProperty("minimumXp") int minimumXp,
+            @JsonProperty("price") int price,
             @JsonProperty("defenseOffset") int amount) {
-        super(ItemType.Armor, name, minimumXp);
+        super(ItemType.Armor, name, minimumXp, price);
         this.amount = amount;
     }
 

@@ -4,19 +4,36 @@
       "@type": "Armor",
       "name": "Leather",
       "minimumXp": 0,
-      "defenseOffset": "5"
+      "price": 10,
+      "defenseOffset": 5
     },
     {
       "@type": "Armor",
       "name": "Chain mail",
       "minimumXp": 1000,
-      "defenseOffset": "10"
+      "price": 100,
+      "defenseOffset": 10
     },
     {
       "@type": "Armor",
       "name": "Plate",
       "minimumXp": 5000,
-      "defenseOffset": "20"
+      "price": 300,
+      "defenseOffset": 20
+    },
+    {
+      "@type": "HealingPotion",
+      "name": "Heal potion",
+      "minimumXp": 50,
+      "price": 10,
+      "amount": 3
+    },
+    {
+      "@type": "Weapon",
+      "name": "Dagger",
+      "minimumXp": 0,
+      "price": 20,
+      "offenseOffset": 5
     }
   ]
 }

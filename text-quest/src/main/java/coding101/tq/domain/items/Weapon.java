@@ -15,16 +15,18 @@ public class Weapon extends BaseEquipableInventoryItem {
     /**
      * Constructor.
      *
-     * @param name   the weapon name
+     * @param name      the weapon name
      * @param minimumXp the minimum experience points required to use
-     * @param amount the amount of offense the weapon adds
+     * @param price     the price to purchase, in coins
+     * @param amount    the amount of offense the weapon adds
      */
     @JsonCreator
     public Weapon(
             @JsonProperty("name") String name,
             @JsonProperty("minimumXp") int minimumXp,
+            @JsonProperty("price") int price,
             @JsonProperty("offenseOffset") int amount) {
-        super(ItemType.Weapon, name, minimumXp);
+        super(ItemType.Weapon, name, minimumXp, price);
         this.amount = amount;
     }
 

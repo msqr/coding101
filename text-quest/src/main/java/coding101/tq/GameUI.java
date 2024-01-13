@@ -2,6 +2,7 @@ package coding101.tq;
 
 import static coding101.tq.domain.ColorPalette.color;
 
+import coding101.tq.domain.Shop;
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.TextColor.ANSI;
 import java.io.IOException;
@@ -19,6 +20,10 @@ public class GameUI implements Pane {
     private final StatusPane status;
     private final HealthPane health;
 
+    private final int mapRightOffset;
+    private final int mapBottomOffset;
+    private ShopPane shop;
+
     /**
      * Constructor.
      *
@@ -31,7 +36,9 @@ public class GameUI implements Pane {
     public GameUI(final Game game, final Timer timer, final int infoWidth, final int statusHeight) {
         super();
         this.game = Objects.requireNonNull(game);
-        this.map = new MapPane(game, infoWidth + 3, statusHeight + 3);
+        this.mapRightOffset = infoWidth + 3;
+        this.mapBottomOffset = statusHeight + 3;
+        this.map = new MapPane(game, mapRightOffset, mapBottomOffset);
         this.info = new InfoPane(game, infoWidth, statusHeight + 3);
         this.status = new StatusPane(game, infoWidth + 3, statusHeight, timer);
         this.health = new HealthPane(game, infoWidth, statusHeight);
@@ -73,6 +80,36 @@ public class GameUI implements Pane {
         return health;
     }
 
+    /**
+     * Get the (optional) shop pane.
+     *
+     * @return the shop
+     */
+    public ShopPane shop() {
+        return shop;
+    }
+
+    /**
+     * Start a shop UI.
+     *
+     * @return the shop pane
+     */
+    public ShopPane startShop(Shop shop) {
+        this.shop = new ShopPane(game, mapRightOffset, mapBottomOffset, shop);
+        this.shop.draw();
+        return this.shop;
+    }
+
+    /**
+     * End the shop UI.
+     */
+    public void endShop() {
+        if (this.shop != null) {
+            this.shop = null;
+            map.draw();
+        }
+    }
+
     @Override
     public int top() {
         return 1;
@@ -103,7 +140,11 @@ public class GameUI implements Pane {
         game.textGraphics().fill(' ');
 
         drawChrome();
-        map().draw();
+        if (shop != null) {
+            shop().draw();
+        } else {
+            map().draw();
+        }
         info().draw();
         status().draw();
         health().draw();

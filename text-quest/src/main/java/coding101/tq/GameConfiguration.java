@@ -36,12 +36,13 @@ public record GameConfiguration(
         int chestCoinsMaximum,
         int chestHealthDamageMaximum,
         GameXpConfiguration xp,
+        GameShopConfiguration shop,
         boolean revealMap,
         boolean gui) {
 
     /** The default game configuration. */
-    public static final GameConfiguration DEFAULTS =
-            new GameConfiguration(20, 30, 30, 100, 5, 100, 50, 5, GameXpConfiguration.DEFAULTS, false, false);
+    public static final GameConfiguration DEFAULTS = new GameConfiguration(
+            20, 30, 30, 100, 5, 100, 50, 5, GameXpConfiguration.DEFAULTS, GameShopConfiguration.DEFAULTS, false, false);
 
     /**
      * Get a new configuration with a specific number of initial coins.
@@ -60,6 +61,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 xp,
+                shop,
                 revealMap,
                 gui);
     }
@@ -81,6 +83,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 new GameXpConfiguration(xp, this.xp.exploreXp(), this.xp.chestXp()),
+                shop,
                 revealMap,
                 gui);
     }
@@ -102,6 +105,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 xp,
+                shop,
                 revealMap,
                 gui);
     }
@@ -124,6 +128,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 xp,
+                shop,
                 revealMap,
                 gui);
     }
@@ -146,6 +151,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 xp,
+                shop,
                 revealMap,
                 gui);
     }
@@ -167,6 +173,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 xp,
+                shop,
                 revealMap,
                 gui);
     }
@@ -188,6 +195,7 @@ public record GameConfiguration(
                 chestRewardFactor,
                 chestHealthDamageMaximum,
                 xp,
+                shop,
                 revealMap,
                 gui);
     }

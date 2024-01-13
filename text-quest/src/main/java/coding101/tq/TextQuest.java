@@ -6,6 +6,7 @@ import coding101.tq.domain.ColorScheme;
 import coding101.tq.domain.Player;
 import coding101.tq.domain.PlayerItems;
 import coding101.tq.domain.Settings;
+import coding101.tq.domain.Shop;
 import coding101.tq.domain.TerrainMap;
 import coding101.tq.domain.TerrainType;
 import coding101.tq.util.BitSetJson;
@@ -362,7 +363,19 @@ public class TextQuest {
     }
 
     private void interactWithShop() throws IOException {
-        // TODO
+        if (ui.shop() != null) {
+            // leave the shop
+            ui.endShop();
+            ui.status().drawMessage(bundle.getString("shop.left"), MESSAGE_CLEAR_DELAY);
+            // TODO: shop interactions
+        } else {
+            final int x = player.getX();
+            final int y = player.getY();
+            final Shop shop = activeMap.shopAt(x, y, game);
+            ui.startShop(shop);
+            ui.status().drawMessage(bundle.getString("shop.entered"), MESSAGE_CLEAR_DELAY);
+        }
+        screen.refresh();
     }
 
     private TerrainMap loadChildMap(String mapName) {

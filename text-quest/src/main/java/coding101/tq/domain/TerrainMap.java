@@ -1,5 +1,6 @@
 package coding101.tq.domain;
 
+import coding101.tq.Game;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -29,6 +31,9 @@ public class TerrainMap {
     private final int width;
     private final int height;
     private final TerrainType[][] terrain;
+
+    // a transient mapping of coordinates to associated Shop instances
+    private Map<Coordinate, Shop> shops = new HashMap<>(2);
 
     /**
      * Constructor.
@@ -267,5 +272,25 @@ public class TerrainMap {
                 throw new RuntimeException("Error writing to output stream: %s".formatted(e.getMessage()), e);
             }
         }
+    }
+
+    /**
+     * Get a shop instance at a given coordinate.
+     *
+     * This method caches shop instances, so the same shop is always returned. In
+     * this way a shop can "run out" of items for sale, until you leave and re-enter
+     * the map.
+     *
+     * @param x    the x coordinate
+     * @param y    the y coordinate
+     * @param game the game
+     * @return the shop
+     */
+    public Shop shopAt(int x, int y, Game game) {
+        final double purchaseRateDiscount = game.player().config().shop().purchaseRateDiscount();
+        final int sellItemsMaximum = 3; // maybe configure somewhere?
+        return shops.computeIfAbsent(
+                new Coordinate(x, y),
+                coord -> new Shop(game.items(), game.player(), purchaseRateDiscount, sellItemsMaximum));
     }
 }

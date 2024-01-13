@@ -176,7 +176,7 @@ public final class CommandLineGameConfiguration {
         if (cl.hasOption(OPT_COLORS_DIR)) {
             colorSchemeDir = cl.getOptionValue(OPT_COLORS_DIR);
         }
-        String colorScheme = "default";
+        String colorScheme = "main";
         if (cl.hasOption(OPT_COLORS_NAME)) {
             colorScheme = cl.getOptionValue(OPT_COLORS_NAME);
         }

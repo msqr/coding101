@@ -214,6 +214,7 @@ public class TextQuest {
                         case Cave -> interactWithCave();
                         case Chest -> interactWithChest();
                         case Ship, Water -> interactWithShip();
+                        case Shop -> interactWithShop();
                         case Town -> interactWithTown();
                         default -> {
                             // nothing to do
@@ -351,6 +352,10 @@ public class TextQuest {
                 screen.refresh();
             }
         }
+    }
+
+    private void interactWithShop() throws IOException {
+        // TODO
     }
 
     private TerrainMap loadChildMap(String mapName) {

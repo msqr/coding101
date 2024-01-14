@@ -58,7 +58,7 @@ public class LinkedLists {
         }
 
         // the head element, or start, of the list
-        private LinkedListElement<T> head;
+        protected LinkedListElement<T> head;
 
         /**
          * Constructor.

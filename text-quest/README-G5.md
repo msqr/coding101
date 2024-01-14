@@ -291,6 +291,25 @@ public static class LinkedList<T> {
 
 Note the `head` field which is a `LinkedListElement<T>` object, the same class as discussed earlier.
 
+### Linked list unit tests
+
+You can also verify your code by running the
+[`LinkedListTests`](./src/test/java/coding101/tq/example/LinkedListTests.java) **unit tests**. Unit
+tests are code that run and verify other code, and are used by programmers to validate their code
+works as expected.
+
+You can execute the tests easily in VS Code, by clicking the green arrows that appear in the
+`LinkedListTests` class, or right-click to execute the tests in the debugger:
+
+<img alt="VS Code unit test class" src="./docs/linked-list-unit-test@2x.png" width="986">
+
+The success or failure of each test method will then appear:
+
+<img alt="VS Code unit test outcome" src="./docs/linked-list-unit-test-outcome@2x.png" width="1087">
+
+> :fire: To succeed fully on this exercise, all `LinkedListTests` tests must **pass** (run
+> successfully).
+
 ### Task 1: add to end of list
 
 Implement the `add(item)` method, which should add `item` to the **end** of the list:

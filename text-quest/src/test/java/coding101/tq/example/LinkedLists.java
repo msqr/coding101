@@ -77,6 +77,14 @@ public class LinkedLists {
         }
 
         /**
+         * Remove all items from the list.
+         */
+        public void clear() {
+            // simply set head to null to remove all items
+            head = null;
+        }
+
+        /**
          * Add an item to the end of the list.
          *
          * @param item the item to add
@@ -165,11 +173,18 @@ public class LinkedLists {
             AtomicInteger count = new AtomicInteger();
             while (true) {
                 count.set(0);
-                System.out.print("Word list has %d items: [".formatted(list.size()));
-                list.forEach(item -> System.out.println("\n  % 3d. %s".formatted(count.incrementAndGet(), item)));
-                System.out.print(
-                        "]\n\nAdd or remove item? Type 'a' or 'r' followed by a space then the word to add/remove: ");
-                String[] input = reader.readLine().split("\\s+", 2);
+                int size = list.size();
+                System.out.print("Word list has %d items: [".formatted(size));
+                list.forEach(item -> System.out.print("\n  % 3d. %s".formatted(count.incrementAndGet(), item)));
+                if (size > 0) {
+                    System.out.println("");
+                }
+                System.out.println("]\n\nType 'a <word>' or 'r <word>' to add/remove words.");
+                System.out.println("Type 'I <word1> <word2>' to insert <word1> before <word2>.");
+                System.out.println("Type 'i <word1> <word2>' to insert <word1> after <word2>.");
+                System.out.println("Type 'b' or 'c' to reverse/clear the list.");
+                System.out.print("Command: ");
+                String[] input = reader.readLine().split("\\s+");
                 if (input.length < 1) {
                     continue;
                 }
@@ -177,20 +192,36 @@ public class LinkedLists {
                     list.reverse();
                     System.out.println("The list is reversed.\n");
                     continue;
+                } else if ("c".equalsIgnoreCase(input[0])) {
+                    list.clear();
+                    System.out.println("The list is cleared.\n");
+                    continue;
                 }
                 if (input.length < 2) {
+                    System.out.println("");
                     continue;
                 }
                 if ("a".equalsIgnoreCase(input[0])) {
                     list.add(input[1]);
-                    System.out.println("Item [%s] was added.".formatted(input[1]));
+                    System.out.println("Item [%s] added.".formatted(input[1]));
                 } else if ("r".equalsIgnoreCase(input[0])) {
                     boolean removed = list.remove(input[1]);
                     if (removed) {
-                        System.out.println("Item [%s] was removed.".formatted(input[1]));
+                        System.out.println("Item [%s] removed.".formatted(input[1]));
                     } else {
-                        System.out.println("Item [%s] was not found!".formatted(input[1]));
+                        System.out.println("Item [%s] not found!".formatted(input[1]));
                     }
+                }
+                if (input.length < 3) {
+                    System.out.println("");
+                    continue;
+                }
+                if ("I".equals(input[0])) {
+                    list.insertBefore(input[1], input[2]);
+                    System.out.println("Item [%s] inserted before [%s].".formatted(input[1], input[2]));
+                } else if ("i".equals(input[0])) {
+                    list.insertAfter(input[1], input[2]);
+                    System.out.println("Item [%s] inserted after [%s].".formatted(input[1], input[2]));
                 }
                 System.out.println("");
             }

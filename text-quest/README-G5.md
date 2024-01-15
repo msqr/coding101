@@ -256,7 +256,7 @@ We can re-phrase that process to make it more general, given a `NewItem` item we
 
 1. Find `PrevItem`, the item we want to insert the new item **after**
 2. Set `NewItem.Next` to `PrevItem.Next`
-3. Set `PrevItem.Next` to `NewItem.Next`
+3. Set `PrevItem.Next` to `NewItem`
 
 > :question: This process sets `NewItem.Next` before `PrevItem.Next`. Could it do this the other way around?
 > Why or why not?

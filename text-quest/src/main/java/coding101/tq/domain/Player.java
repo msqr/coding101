@@ -50,7 +50,7 @@ public class Player {
         this.coins = config.initialCoins();
         this.health = config.initialHealth();
         this.maxHealth = config.initialMaxHealth();
-        this.xp = config.xp().iniialXp();
+        this.xp = config.xp().initialXp();
     }
 
     /**

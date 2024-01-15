@@ -8,7 +8,7 @@ package coding101.tq;
  *                  terrain; defaults to 1
  * @param chestXp   the experience points earned by opening chest; defaults to 5
  */
-public record GameXpConfiguration(int iniialXp, int exploreXp, int chestXp) {
+public record GameXpConfiguration(int initialXp, int exploreXp, int chestXp) {
 
     /** The default game experience points configuration. */
     public static final GameXpConfiguration DEFAULTS = new GameXpConfiguration(0, 1, 5);

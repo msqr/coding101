@@ -349,7 +349,7 @@ public class VehicleShop {
 }
 ```
 
-## List, Set, and Map collections
+## List and Set collections
 
 We have seen over and over how the concept of a list of items is very common and very useful
 in programming (using both arrays and dynamic list classes like `LinkedList`). Another term
@@ -383,6 +383,18 @@ a** `Collection`, which **is an** `Iterable`. Or you could say that a `List` **i
 > :bulb: You do not need to think too much about all these interfaces yet, just focus on `List` and
 > we will see how the parent interfaces fit it a bit later.
 
+#### List implementations
+
+There are two main `List` implementations in Java: `java.util.ArrayList` and `java.util.LinkedList`.
+They are implemented using arrays and linked lists, respectively. You can mostly use the two 
+implementations interchangeably. For general use the `ArrayList` usually performs better than
+`LinkedList`.
+
+> :question: Given all we have discussed about array-backed lists versus linked lists, can you think
+> of different list **usage scenarios** where `LinkedList` would be a better-performing choice than
+> `ArrayList`, and vice-versa? By _usage scenario_ I mean _how the list would be **primarily** used
+> in your program_.
+
 ### Sets
 
 The idea of a **set** is that of a list that holds **only unique values** and does **not** keep
@@ -406,7 +418,6 @@ We could have the same method on a `Set` interface:
 
 ```java
 public interface Set<T> {
-
 
     /**
      * Add a value to the set.
@@ -474,6 +485,308 @@ Iterable<T>
     +-- Set<T>
 ```
 
-So a `Set` is a `Collection<T>` and `Iterable<T>`, but **not** a `SequencedCollection<T>`.
+So a `Set<T>` is a `Collection<T>` and `Iterable<T>`, but **not** a `SequencedCollection<T>`.
 
-### Maps
+### Collection iteration
+
+In the `LinkedList` class in the previous challenge, we had an iteration method `forEach(fn)`:
+
+```java
+/**
+ * Iterate over all items in the list, invoking the {@code accept(item)}
+ * method on the provided callback function for each item.
+ * 
+ * @param fn the callback function to call {@code accept(item)} for every
+ *               item in the list
+ */
+public void forEach(Consumer<T> fn);
+```
+
+The Java `java.util.Iterable<T>` interface that both `List` and `Set` extend provides a similar
+mechanism to support iteration:
+
+```java
+public interface Iterable<T> {
+
+    /**
+     * Returns an iterator over elements of type {@code T}.
+     *
+     * @return an Iterator.
+     */
+    Iterator<T> iterator();
+}
+```
+
+OK, that `iterator()` method just returns an `java.util.Iterator<T>` object. Let us have a look
+at that:
+
+```java
+public interface Iterator<T> {
+    
+    /**
+     * Returns {@code true} if the iteration has more elements.
+     * (In other words, returns {@code true} if {@link #next} would
+     * return an element rather than throwing an exception.)
+     *
+     * @return {@code true} if the iteration has more elements
+     */
+    boolean hasNext();
+
+    /**
+     * Returns the next element in the iteration.
+     *
+     * @return the next element in the iteration
+     * @throws NoSuchElementException if the iteration has no more elements
+     */
+    T next();
+
+}
+```
+
+> :question: Take a look at the `Iterable` and `Iterator` interfaces. Can you think of how
+> you could use those on a `List` object to loop over all items in the list?
+
+Here is one way you can use the `Iterable` interface on a `List` to loop over, or **iterate**
+all values in the list:
+
+```java
+List<String> list = newList("a", "b", "c"); // newList() contains "a", "b", and "c"
+for (    Iterator<String> itr = list.iterator();  // get Iterator from the List
+         itr.hasNext();                           // loop until hasNext() returns false
+         ) {                                      // nothing to change here
+    String val = itr.next();
+    System.out.println("Item is %s".formatted(val));
+} 
+```
+
+This technique of iterating over Java collections is so common that Java actually provides
+a short-hand way of doing it, using a **modified `Iterable` for loop** that looks like this:
+
+```java
+List<String> list = newList("a", "b", "c"); // newList() contains "a", "b", and "c"
+for (String val : list) {                   // loop over all values in the list
+    System.out.println("Item is %s".formatted(val));
+} 
+```
+
+Notice the `:` character between the local variable `val` and the `list` variable. This
+syntax translates to "loop over each item in `list`, setting `val` to each item per
+loop iteration". Behind the scenes the Java compiler actually translates your code
+into code resembling the `for (Iterator<String> = itr.iterator(); itr.hasNext(); ) {}`
+syntax shown previously.
+
+> :question: We talked about how to iterate a `List`; how do you think you can iterate a `Set`?
+
+## Maps
+
+A **map** concept is like a **dictionary** of **unique keys** with associated **values**. In some
+programming languages, maps are actually called dictionaries, or sometimes keyed arrays.
+
+> :bulb: Imagine how you use a real (word) dictionary: you look up a word (the key) and get its
+> associated meaning (the value).
+
+In JavaScript objects behave a lot like maps, where the object properties are the keys and their
+associated values the map values:
+
+```js
+{
+    name:   "Player 1",
+    health: 50,
+    xp :    1020
+}
+```
+
+Here we have a JavaScript object that is like a map with _name_, _health_, and _xp_ **keys**. The
+value for key `name` is `Player 1`, and key `xp` is `1020`.
+
+In Java, the `java.util.Map<K, V>` interface models a map, where `K` is the **type of key** used and
+`V` the **type of value**. For example a map of strings to associated integers would be a
+`Map<String, Integer>`. The gist of the `Map` interface looks like this:
+
+```java
+public interface Map<K, V> {
+    // Query Operations
+
+    /**
+     * Returns the number of key-value mappings in this map.
+     *
+     * @return the number of key-value mappings in this map
+     */
+    int size();
+
+    /**
+     * Returns {@code true} if this map contains no key-value mappings.
+     *
+     * @return {@code true} if this map contains no key-value mappings
+     */
+    boolean isEmpty();
+
+    /**
+     * Returns {@code true} if this map contains a mapping for the specified
+     * key.
+     *
+     * @param key key whose presence in this map is to be tested
+     * @return {@code true} if this map contains a mapping for the specified
+     *         key
+     */
+    boolean containsKey(Object key);
+
+    /**
+     * Returns {@code true} if this map maps one or more keys to the
+     * specified value.
+     *
+     * @param value value whose presence in this map is to be tested
+     * @return {@code true} if this map maps one or more keys to the
+     *         specified value
+     */
+    boolean containsValue(Object value);
+
+    /**
+     * Returns the value to which the specified key is mapped,
+     * or {@code null} if this map contains no mapping for the key.
+     *
+     * @param key the key whose associated value is to be returned
+     * @return the value to which the specified key is mapped, or
+     *         {@code null} if this map contains no mapping for the key
+     */
+    V get(Object key);
+
+    // Modification Operations
+
+    /**
+     * Associates the specified value with the specified key in this map.
+     * 
+     * If the map previously contained a mapping for the key, the old value
+     * is replaced by the specified value.
+     *
+     * @param key key with which the specified value is to be associated
+     * @param value value to be associated with the specified key
+     * @return the previous value associated with {@code key}, or
+     *         {@code null} if there was no mapping for {@code key}.
+     *         (A {@code null} return can also indicate that the map
+     *         previously associated {@code null} with {@code key},
+     *         if the implementation supports {@code null} values.)
+     */
+    V put(K key, V value);
+
+    /**
+     * Removes the mapping for a key from this map if it is present.
+     *
+     * The map will not contain a mapping for the specified key once the
+     * call returns.
+     *
+     * @param key key whose mapping is to be removed from the map
+     * @return the previous value associated with {@code key}, or
+     *         {@code null} if there was no mapping for {@code key}.
+     */
+    V remove(Object key);
+}
+```
+
+The `get(key)`, `put(key, value)`, and `remove(key)` methods allow you to get the value for a key,
+add a key and associated value, and remove a key (along with its associated value).
+
+It is important to reiterate that the set of keys in a map **is always unique**. If you call
+`put(key, value)` with the same `key` but a different `value`, the map will **replace** the first
+value with the second.
+
+> :question: Thinking about how the collection of keys in a map is unique, does that remind you of
+> any other data structure?
+
+Another method in `Map` returns a `Set<K>` of all the keys defined in the map:
+
+```java
+public interface Map<K, V> {
+
+    /**
+     * Returns a {@link Set} view of the keys contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice-versa.
+     *
+     * @return a set view of the keys contained in this map
+     */
+    Set<K> keySet();
+   
+}
+```
+
+That opens up the possibility of **iterating** over all keys in the `Map`, since
+you can iterate over the values in the `Set` returned by `keySet()`:
+
+```java
+Map<String, Integer> enemyPoints = newMap("zombie", 10, "werewolf", 15, "vampire", 25);
+Set<String> enemies = enemyPoints.keySet();
+for (String enemy : enemies) {
+    Integer points = enemyPoints.get(enemy);
+    System.out.println("Enemy %s is worth %d points.".formatted(enemy, points));
+}
+```
+
+> :question: What does this program print out?
+
+What we just did, iterate over the keys of a map, calling `map.get(key)` for each
+key of the iteration, is a very common technique. Java provides another method
+to help with this pattern:
+
+```java
+public interface Map<K, V> {
+    /**
+     * Returns a {@link Set} view of the mappings contained in this map.
+     * The set is backed by the map, so changes to the map are
+     * reflected in the set, and vice-versa.  If the map is modified
+     * while an iteration over the set is in progress (except through
+     * the iterator's own {@code remove} operation, or through the
+     * {@code setValue} operation on a map entry returned by the
+     * iterator) the results of the iteration are undefined.  The set
+     * supports element removal, which removes the corresponding
+     * mapping from the map, via the {@code Iterator.remove},
+     * {@code Set.remove}, {@code removeAll}, {@code retainAll} and
+     * {@code clear} operations.  It does not support the
+     * {@code add} or {@code addAll} operations.
+     *
+     * @return a set view of the mappings contained in this map
+     */
+    Set<Entry<K, V>> entrySet();
+
+}
+```
+
+The `entrySet()` method is returning a `Set`, much like `keySet()` did, but
+the **set type** is different, it is a `Entry<K, V>` type. What is that?
+The gist of if the `Entry` interface looks like this:
+
+```java
+public interface Entry<K, V> {
+
+    /**
+     * Returns the key corresponding to this entry.
+     *
+     * @return the key corresponding to this entry
+     */
+    K getKey();
+
+    /**
+     * Returns the value corresponding to this entry.  If the mapping
+     * has been removed from the backing map (by the iterator's
+     * {@code remove} operation), the results of this call are undefined.
+     *
+     * @return the value corresponding to this entry
+     */
+    V getValue();
+}
+```
+
+OK, so `Entry` is something with `getKey()` and `getValue()` methods. Can you
+see where this is going? An `Entry` represents one key/value pair in a `Map`!
+So a `Set<Entry<K, V>>` is a set of key/value pairs, unique to key key in the
+map. Here is how we could re-write our previous example of iterating over a
+`Map`:
+
+```java
+Map<String, Integer> enemyPoints = newMap("zombie", 10, "werewolf", 15, "vampire", 25);
+for (Entry<String, Ingeger> entry : enemyPoints.entrySet()) {
+    String enemy = entry.getKey();
+    Integer points = entry.getValue();
+    System.out.println("Enemy %s is worth %d points.".formatted(enemy, points));
+}
+```

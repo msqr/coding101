@@ -487,6 +487,20 @@ Iterable<T>
 
 So a `Set<T>` is a `Collection<T>` and `Iterable<T>`, but **not** a `SequencedCollection<T>`.
 
+#### Set implementations
+
+There are three main `Set` implementations in Java: `java.util.HashSet`, `java.util.LinkedHashSet`,
+and `java.util.TreeSet`. The `HashSet` is a good all-around set implementation that does not
+maintain any order of the values added to it, so when you iterate over the values in the set you
+have no way of knowing what order they will be returned. The `LinkedHashSet` maintains **insertion
+order** of the values, so when you list the values they will be listed in the order they were added,
+oldest to newest. The `TreeSet` maintains **sorted order** of the values, so when you list the
+values they will be listed in a sorted order, be that alphabetic (for strings) or numeral (for
+numbers).
+
+> :bulb: Unless you rely on an ordering of the values in a set, the `HashSet` is your best option
+> and will perform better than `LinkedHashSet` or `TreeSet`.
+
 ### Collection iteration
 
 In the `LinkedList` class in the previous challenge, we had an iteration method `forEach(fn)`:
@@ -790,3 +804,247 @@ for (Entry<String, Ingeger> entry : enemyPoints.entrySet()) {
     System.out.println("Enemy %s is worth %d points.".formatted(enemy, points));
 }
 ```
+
+### Map implementation: `HashMap`
+
+The default `java.util.Map` implementation in Java is the `java.util.HashMap` class. This class
+models a map using a **hash bucket** approach. At its most basic, a hash bucket is an **array of
+lists**. Each element of the array is called a **bucket** and represents a **subset (range) of all
+possible key values** in the map, and the list associated with each element holds all the
+**key/value pairs**, or **entries** that fall into that bucket's range.
+
+If you imagine a dictionary again, the elements of the array are like **letter ranges**. Imagine a
+dictionary of fruit names with associated costs. That is a `Map<String, Integer>` style map. If we
+visualize that as an array with just 2 ranges, or **buckets**, that cover all letters of the English
+alphabet, after we add several entries to the map it would look like this:
+
+```
+    buckets                       entries
++------------+    
+|            |     +---------------+-------------+-------------+
+| range: a-m |     | key:   apple  | key: mango  | key: cherry |
+| values:  ------->| value: 5      | value: 15   | value: 20   |
+|            |     +---------------+-------------+-------------+
++------------+     
+|            |     +---------------+-------------+
+| range: n-z |     | key:   pear   | key: peach  |
+| values:  ------->| value: 3      | value: 8    |
+|            |     +---------------+-------------+
++------------+
+```
+
+> :question: What are the logical steps it would take, in plain language, to add an entry `(key:
+> nectarine, value: 8)` to this structure? What steps would it take to update the `cherry` entry's
+> value to `22`?
+
+So far our bucket elements have a `range` that identifies a range of letters to hold in that bucket.
+That means for every operation that depends on a map key, in order to identify which bucket that key
+is associated with we need to:
+
+ 1. extract the first character out of the key
+ 2. find the index of the bucket whose range contains that character
+ 
+ What if instead of just 2 buckets, we decided we wanted one bucket for every letter in the
+ alphabet, so 26 buckets? Let us visualize that, and include the bucket array indexes:
+
+ ```
+       buckets   
+    +------------+
+  0 | range: a-a |
+    | values: -------> ...
+    +------------+
+  1 | range: b-b |
+    | values: -------> ...
+    +------------+
+    ...
+    +------------+
+ 24 | range: y-y |
+    | values: -------> ...
+    +------------+
+ 25 | range: z-z |
+    | values: -------> ...
+    +------------+
+ ```
+
+Now step #2 in our "find the right bucket" process changes ever so slightly, because the
+"range" in each bucket element is actually not a range at all, it is just a single
+character. The process can be changed to:
+
+ 1. extract the first character out of the key
+ 2. find the index of the bucket whose "range" **equals** that character
+
+Now there is another interesting thing about computers that comes into play here: **a "character" is
+actually just a number**, that is **displayed** to you as a letter with the help of a **font**.
+Let us imagine that our computer alphabet are actually numbers, starting at `0`, like this:
+
+```
+ a  b        y  z
++--+--+     +--+--+
+|0 |1 | ... |24|25|
++--+--+     +--+--+
+```
+
+So, if `a == 0` and `b == 1` and so on, does that help our "find the right bucket"
+process at all, knowning that the buckets are stored in an **array**?
+
+It sure does! Once we have a letter, we can just treat that as an **array index**
+and we know exactly what bucket element we need. In Java, however, the character
+`a` is not equal to `0` so we can subtract whatever `a` is from the letter to
+shift the result so that `a` is treated as `0`:
+
+```java
+public class HashMap {
+
+    /**
+     * Get the bucket array index to use for a given key.
+     * 
+     * @param key the key
+     * @return the bucket array index to use
+     */
+    public int bucketIndexForKey(String key) {
+        // 1. extract first character from key
+		char letter = key.charAt(0);
+        
+        // 2. treat letter as number, and shift so that a == 0
+		int bucketIndex = letter - 'a';
+
+        return bucketIndex;
+    }
+
+}
+```
+
+OK, this is feeling pretty good now: our "find the right bucket" process is
+fast and efficient. But it has several limitations, such as:
+
+ 1. Does not handle capital letters
+ 2. Does not handle words starting with numbers, or any other character outside a - z
+ 3. Does not work for other key types, like `Integer`
+
+Hmm. What can we do to fix these? For example if we look just at handling capital letters, maybe we
+just convert the key's first character to lower-case (Java provides the
+`Character.toLowerCase(character)` for that). That does not solve #2, though, nor would it work for
+#3 when we are not working with string keys in the first place.
+
+If we take a step back and try to think about what these limitations have in common, one that that
+comes to mind is that they all require finding a way to **translate** a possibly **infinite number
+of keys** into a **fixed number of buckets**. We could go back to our original range-based bucket
+search approach, but after seeing how nice it was being able to quickly translate a key into a
+bucket index, it would be nice to be able to keep using this approach.
+
+This problem, of translating an infinite number of values into a fixed subset of values, is known as
+**hashing** in computing. Put another way, you take an arbitrary value and compute a **hash value**
+for it, or **hash code**. We can rename our `bucketIndexForKey()` method accordingly:
+
+```java
+public int hashCode(String key) {
+    // 1. extract first character from key
+    char letter = key.charAt(0);
+    
+    // 2. treat letter as number, and shift so that a == 0
+    int bucketIndex = letter - 'a';
+
+    return bucketIndex;
+}
+```
+
+Now let me take you back to your math class from years ago, when you studied basic division
+with **remainders**. Do you remember that? For example **5 ÷ 3** is **1 remainder 2**, or just 1 R 2.
+
+> :question: What is the possible range of values can `R` be when dividing by **3**?
+
+We can quickly write out a small table of dividing by 3 to help give us a clue:
+
+| Dividend | Divisor | Result | Remainder |
+|:---------|:--------|:-------|:----------|
+| 0        | 3       | 0 | 0 |
+| 1        | 3       | 0 | 1 |
+| 2        | 3       | 0 | 2 |
+| 3        | 3       | 1 | 0 |
+| 4        | 3       | 1 | 1 |
+| 5        | 3       | 1 | 2 |
+| 6        | 3       | 2 | 0 |
+| 7        | 3       | 2 | 1 |
+| 8        | 3       | 2 | 2 |
+
+Do you see it? The remainder can be **one of 3 values**, between 0 - 2. What if the divisor is, say, 4?
+
+| Dividend | Divisor | Result | Remainder |
+|:---------|:--------|:-------|:----------|
+| 0        | 4       | 0 | 0 |
+| 1        | 4       | 0 | 1 |
+| 2        | 4       | 0 | 2 |
+| 3        | 4       | 0 | 3 |
+| 4        | 4       | 1 | 0 |
+| 5        | 4       | 1 | 1 |
+| 6        | 4       | 1 | 2 |
+| 7        | 4       | 1 | 3 |
+| 8        | 4       | 2 | 0 |
+
+The remainder can be **one of 4 values**, always between 0 - 3. Do you see a pattern here that might
+help? 
+
+> :bulb: In our example tables, the Dividend is the **infinite list of keys** and the Divisor is the
+> **fixed number of buckets** and the Remainder is the **hash code**!
+
+Java provides the **modulo** operator `%` that returns the remainder from whole-number division:
+
+```java
+int whole     = 7 / 3; // whole == 2
+int remainder = 7 % 3; // remainder == 1
+```
+
+Using the `%` operator we can update our `hashCode()` method to handle **any string key**:
+
+```java
+public class HashMap {
+
+    private List<Entry>[] buckets; // initialized somewhere
+
+    /**
+     * Get the bucket array index to use for a given key.
+     * 
+     * @param key the key
+     * @return the bucket array index to use
+     */
+    public int hashCode(String key) {
+        // 1. extract first character from key
+		char letter = key.charAt(0);
+        
+        // 2. translate the letter into a bucket element index
+        //    as the remainder after dividing the letter by
+        //    the number of buckets
+        return letter % buckets.length;
+    }
+
+}
+```
+
+> :question: What if our keys were `Integer` values? Complete the following method implementation:
+
+```java
+public class HashMap {
+
+    private List<Entry>[] buckets; // initialized somewhere
+
+    public int hashCode(int key) {
+        int bucketIndex;
+        // TODO: comptue hash code for key and assign to bucketIndex
+        return bucketIndex;
+    }
+}
+```
+
+> :bulb: Now you know why the `java.util.HashMap` class is named what it is: because under the hood
+> it uses **hashing** of key values to assign entries to a fixed number of array elements, or _hash
+> buckets_.
+
+
+## Other useful collections
+
+Java provides many other useful collections, some of which I will outline here and
+leave to you to explore more fully:
+
+| Collection | Description |
+|:-----------|:------------|
+| `java.util.Tree`

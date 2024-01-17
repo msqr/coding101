@@ -89,16 +89,16 @@ public class InfoPane implements Pane {
                 .setForegroundColor(color(game.settings().colors().foreground().uiText(), ANSI.WHITE_BRIGHT));
         game.textGraphics().putString(col, row, label);
 
-        int coinDisplayCol = col + width - value.length();
+        int valueDisplayCol = col + width - value.length();
         game.textGraphics()
                 .setForegroundColor(color(game.settings().colors().foreground().uiBorder(), ANSI.WHITE));
-        for (int i = col + label.length(); i < coinDisplayCol; i++) {
+        for (int i = col + label.length(); i < valueDisplayCol; i++) {
             game.textGraphics().setCharacter(i, row, '.');
         }
 
         game.textGraphics()
                 .setForegroundColor(color(game.settings().colors().foreground().uiText(), ANSI.WHITE_BRIGHT));
-        game.textGraphics().putString(coinDisplayCol, row, value);
+        game.textGraphics().putString(valueDisplayCol, row, value);
     }
 
     /**

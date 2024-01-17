@@ -72,4 +72,26 @@ public interface Game {
      * @throws IOException if an IO error occurs
      */
     boolean readYesNo() throws IOException;
+
+    /**
+     * Read a character response from the player.
+     *
+     * @return the character
+     * @throws IOException if an IO error occurs
+     */
+    char readCharacter() throws IOException;
+
+    /**
+     * Read an integer response from the player.
+     *
+     * This method will read number characters until the Enter key is pressed. If
+     * Enter is pressed before typing any number character, {@code null} is
+     * returned.
+     *
+     * @param x the column to display the typed numbers
+     * @param y the row to display the typed numbers
+     * @return the integer, or {@code null} if no number entered
+     * @throws IOException if an IO error occurs
+     */
+    Integer readInteger(int x, int y) throws IOException;
 }

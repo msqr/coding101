@@ -14,7 +14,6 @@ import java.util.List;
  */
 public class Shop {
 
-    private final PlayerItems gameItems;
     private final Player player;
     private final double purchaseRateDiscount;
 
@@ -33,7 +32,6 @@ public class Shop {
      */
     public Shop(PlayerItems gameItems, Player player, double purchaseRateDiscount, int sellItemsMaximum) {
         super();
-        this.gameItems = requireNonNull(gameItems);
         this.player = requireNonNull(player);
         this.purchaseRateDiscount = purchaseRateDiscount;
         this.itemsForSale = generateItemsForSale(gameItems, player, sellItemsMaximum);
@@ -47,6 +45,44 @@ public class Shop {
         // be offered.
 
         return Collections.emptyList();
+    }
+
+    /**
+     * Purchase the given shop item.
+     *
+     * Calling this method causes {@code itemToPurchase} to be removed from the
+     * shop's inventory, and added to the player's inventory. The palyer's coins are
+     * decreased by the item's price.
+     *
+     * @param itemToPurchase the item to purchase
+     */
+    public void purchase(InventoryItem itemToPurchase) {
+        // TODO: purchase the item from the shop
+    }
+
+    /**
+     * Get the price for the shop to purchase a player item.
+     *
+     * @param itemToSell the item the player offers for sale
+     * @return the price the shop will agree to purchase the item at
+     */
+    public int sellItemPrice(InventoryItem itemToSell) {
+        int sellPrice = 0;
+        // TODO: calculate the sell price
+        return sellPrice;
+    }
+
+    /**
+     * Sell an inventory item to the shop.
+     *
+     * Calling this method causes {@code itemToSell} to be removed from the player's
+     * inventory and the player's coins increased by the agreed sale price.
+     *
+     * @param itemToSell    the item to sell
+     * @param purchasePrice the agreed purchase price
+     */
+    public void sell(InventoryItem itemToSell) {
+        // TODO: sell the player item to the shop
     }
 
     /**

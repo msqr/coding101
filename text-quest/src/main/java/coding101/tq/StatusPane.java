@@ -3,6 +3,7 @@ package coding101.tq;
 import static coding101.tq.domain.ColorPalette.color;
 import static java.util.Objects.requireNonNull;
 
+import coding101.tq.domain.Coordinate;
 import com.googlecode.lanterna.Symbols;
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
@@ -111,8 +112,9 @@ public class StatusPane implements Pane {
      * @param message        the message to display
      * @param clearAfterSecs if greater than {@code 0} then clear the message after
      *                       this many seconds
+     * @return the coordinate immediately after the last character drawn
      */
-    public void drawMessage(String message, int clearAfterSecs) {
+    public Coordinate drawMessage(String message, int clearAfterSecs) {
         final TimerTask statusTask = this.statusTask;
         if (statusTask != null) {
             statusTask.cancel();
@@ -120,7 +122,7 @@ public class StatusPane implements Pane {
         setMessage(message);
         if (message == null) {
             draw();
-            return;
+            return new Coordinate(left(), top());
         }
         int start = 0;
         while (true) {
@@ -140,10 +142,10 @@ public class StatusPane implements Pane {
                 msg += Symbols.TRIANGLE_DOWN_POINTING_MEDIUM_BLACK;
             }
             draw(msg);
-            start = end;
             if (end >= message.length()) {
                 break;
             }
+            start = end;
             try {
                 game.screen().refresh();
                 game.readYesNo();
@@ -167,6 +169,22 @@ public class StatusPane implements Pane {
             };
             timer.schedule(tt, clearAfterSecs * 1000L);
             this.statusTask = tt;
+        }
+        return new Coordinate(message.length() - start + 1, top());
+    }
+
+    /**
+     * Draw a character.
+     *
+     * If the (x,y) coordinate it out of bounds of this pane, it will not be drawn.
+     *
+     * @param x the column
+     * @param y the row
+     * @param c the character to draw
+     */
+    public void drawCharacter(int x, int y, char c) {
+        if (x <= right() && y == top()) {
+            game.textGraphics().setCharacter(x, y, c);
         }
     }
 }

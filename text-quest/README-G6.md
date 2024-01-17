@@ -493,13 +493,13 @@ There are three main `Set` implementations in Java: `java.util.HashSet`, `java.u
 and `java.util.TreeSet`. The `HashSet` is a good all-around set implementation that does not
 maintain any order of the values added to it, so when you iterate over the values in the set you
 have no way of knowing what order they will be returned. The `LinkedHashSet` maintains **insertion
-order** of the values, so when you list the values they will be listed in the order they were added,
-oldest to newest. The `TreeSet` maintains **sorted order** of the values, so when you list the
-values they will be listed in a sorted order, be that alphabetic (for strings) or numeral (for
-numbers).
+order** of the values, so when you iterate over the values they will be returned in the order they
+were added, oldest to newest. The `TreeSet` maintains **sorted order** of the values, so when you
+iterate over the values they will be returned in a sorted order, be that alphabetic (for strings) or
+numeric (for numbers).
 
-> :bulb: Unless you rely on an ordering of the values in a set, the `HashSet` is your best option
-> and will perform better than `LinkedHashSet` or `TreeSet`.
+> :bulb: Unless you rely on an ordering of the values in a set for some reason, the `HashSet` is
+> your best option and will perform better than `LinkedHashSet` or `TreeSet`.
 
 ### Collection iteration
 
@@ -560,18 +560,20 @@ public interface Iterator<T> {
 > :question: Take a look at the `Iterable` and `Iterator` interfaces. Can you think of how
 > you could use those on a `List` object to loop over all items in the list?
 
-Here is one way you can use the `Iterable` interface on a `List` to loop over, or **iterate**
-all values in the list:
+Here is one way you can use the `Iterable` interface on a `List` to loop over all values in the
+list:
 
 ```java
 List<String> list = newList("a", "b", "c"); // newList() contains "a", "b", and "c"
 for (    Iterator<String> itr = list.iterator();  // get Iterator from the List
          itr.hasNext();                           // loop until hasNext() returns false
          ) {                                      // nothing to change here
-    String val = itr.next();
+    String val = itr.next();                      // call next() for the next list litem
     System.out.println("Item is %s".formatted(val));
 } 
 ```
+
+#### Short-cut `Iterable` for loop
 
 This technique of iterating over Java collections is so common that Java actually provides
 a short-hand way of doing it, using a **modified `Iterable` for loop** that looks like this:
@@ -583,11 +585,12 @@ for (String val : list) {                   // loop over all values in the list
 } 
 ```
 
-Notice the `:` character between the local variable `val` and the `list` variable. This
-syntax translates to "loop over each item in `list`, setting `val` to each item per
-loop iteration". Behind the scenes the Java compiler actually translates your code
-into code resembling the `for (Iterator<String> = itr.iterator(); itr.hasNext(); ) {}`
-syntax shown previously.
+Notice the `:` character between the local variable `val` and the `list` variable. The only
+requirement for this style of loop is that `list` implement the `Iterable` interface (which we know
+`List` extends). This syntax translates to "loop over each item in `list`, setting `val` to each
+item per loop iteration". Behind the scenes the Java compiler actually translates your code into
+code resembling the `for (Iterator<String> = itr.iterator(); itr.hasNext(); ) { var val = itr.next(); }` syntax shown
+previously.
 
 > :question: We talked about how to iterate a `List`; how do you think you can iterate a `Set`?
 
@@ -736,7 +739,8 @@ for (String enemy : enemies) {
 }
 ```
 
-> :question: What does this program print out?
+> :question: This program prints out one line per map key. Exactly what does this program print out?
+> Do you know the exact order of those lines?
 
 What we just did, iterate over the keys of a map, calling `map.get(key)` for each
 key of the iteration, is a very common technique. Java provides another method
@@ -813,10 +817,14 @@ lists**. Each element of the array is called a **bucket** and represents a **sub
 possible key values** in the map, and the list associated with each element holds all the
 **key/value pairs**, or **entries** that fall into that bucket's range.
 
-If you imagine a dictionary again, the elements of the array are like **letter ranges**. Imagine a
-dictionary of fruit names with associated costs. That is a `Map<String, Integer>` style map. If we
-visualize that as an array with just 2 ranges, or **buckets**, that cover all letters of the English
-alphabet, after we add several entries to the map it would look like this:
+If you imagine a regular dictionary (book) again, the **pages** of the dictionary are like elements
+in the array: a **bucket**. Each page has a **letter range** at the top that shows you the possible
+range of word in that bucket: the **range**.
+
+Now magine a dictionary of fruit names with associated costs (instead of a definition). That is a
+`Map<String, Integer>` style map. Imagine this dictionary has just 2 pages, one for fruits starting
+with a letter in the range **a - m** and another with a letter in the range **n - z**. After we add
+several entries to the map it would look like this:
 
 ```
     buckets                       entries
@@ -836,6 +844,8 @@ alphabet, after we add several entries to the map it would look like this:
 > :question: What are the logical steps it would take, in plain language, to add an entry `(key:
 > nectarine, value: 8)` to this structure? What steps would it take to update the `cherry` entry's
 > value to `22`?
+
+#### Finding the right bucket
 
 So far our bucket elements have a `range` that identifies a range of letters to hold in that bucket.
 That means for every operation that depends on a map key, in order to identify which bucket that key
@@ -914,8 +924,10 @@ public class HashMap {
 }
 ```
 
-OK, this is feeling pretty good now: our "find the right bucket" process is
-fast and efficient. But it has several limitations, such as:
+#### Handling ∞ possible keys
+
+OK, this is feeling pretty good now: our "find the right bucket" process is fast and efficient. But
+it has several limitations, such as:
 
  1. Does not handle capital letters
  2. Does not handle words starting with numbers, or any other character outside a - z
@@ -948,10 +960,13 @@ public int hashCode(String key) {
 }
 ```
 
-Now let me take you back to your math class from years ago, when you studied basic division
-with **remainders**. Do you remember that? For example **5 ÷ 3** is **1 remainder 2**, or just 1 R 2.
+#### Division to the rescue
 
-> :question: What is the possible range of values can `R` be when dividing by **3**?
+Now let me take you back to your math class from years ago, when you studied basic whole number
+division with **remainders**. Do you remember that? For example **5 ÷ 3** is **1 remainder 2**.
+
+> :question: What is the **possible range** of values the **remainder** can be when dividing any
+> number by **3**?
 
 We can quickly write out a small table of dividing by 3 to help give us a clue:
 
@@ -967,7 +982,8 @@ We can quickly write out a small table of dividing by 3 to help give us a clue:
 | 7        | 3       | 2 | 1 |
 | 8        | 3       | 2 | 2 |
 
-Do you see it? The remainder can be **one of 3 values**, between 0 - 2. What if the divisor is, say, 4?
+Do you see it? When dividing by 3, the remainder can be **one of 3 values**, between 0 - 2. What if
+the divisor is, say, 4?
 
 | Dividend | Divisor | Result | Remainder |
 |:---------|:--------|:-------|:----------|
@@ -981,11 +997,11 @@ Do you see it? The remainder can be **one of 3 values**, between 0 - 2. What if 
 | 7        | 4       | 1 | 3 |
 | 8        | 4       | 2 | 0 |
 
-The remainder can be **one of 4 values**, always between 0 - 3. Do you see a pattern here that might
-help? 
+When dividing by 4, the remainder can be **one of 4 values**, always between 0 - 3. Do you see a
+pattern here that might help with our hashing problem? 
 
 > :bulb: In our example tables, the Dividend is the **infinite list of keys** and the Divisor is the
-> **fixed number of buckets** and the Remainder is the **hash code**!
+> **fixed number of buckets** and the Remainder is the **hash code** for the Dividend!
 
 Java provides the **modulo** operator `%` that returns the remainder from whole-number division:
 
@@ -1009,7 +1025,7 @@ public class HashMap {
      */
     public int hashCode(String key) {
         // 1. extract first character from key
-		char letter = key.charAt(0);
+        char letter = key.charAt(0);
         
         // 2. translate the letter into a bucket element index
         //    as the remainder after dividing the letter by
@@ -1028,9 +1044,9 @@ public class HashMap {
     private List<Entry>[] buckets; // initialized somewhere
 
     public int hashCode(int key) {
-        int bucketIndex;
-        // TODO: comptue hash code for key and assign to bucketIndex
-        return bucketIndex;
+        int result;
+        // TODO: comptue the hash code for key and assign to result
+        return result;
     }
 }
 ```
@@ -1039,12 +1055,22 @@ public class HashMap {
 > it uses **hashing** of key values to assign entries to a fixed number of array elements, or _hash
 > buckets_.
 
+> :question: Did you also remember the `java.util.HashSet` class? Can you think of why that class
+> is named what it is?
+
 
 ## Other useful collections
 
-Java provides many other useful collections, some of which I will outline here and
-leave to you to explore more fully:
+Java provides many other useful collections. Here is an incomplete list of some popular ones that I
+will leave to you to explore more fully:
 
 | Collection | Description |
 |:-----------|:------------|
-| `java.util.Tree`
+| `java.util.ArrayList` | A **list** using arrays for storage. |
+| `java.util.LinkedList` | A **list** using a linked list for storage. |
+| `java.util.HashMap` | A **map** using a hash-bucket array of linked-lists for storage. |
+| `java.util.LinkedHashMap` | A **map** using a hash-bucket array of linekd-lists _and_ a separate linked-list to iterate in insertion order. |
+| `java.util.TreeMap` | A **map** using a [red-black](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree) tree structure for storage to iterate in natural sort order. |
+| `java.util.HashSet` | A **set** using a `HashMap` for stoarge, the keys of the map being the values of the set. |
+| `java.util.LinkedHashSet` | A **set** using a `LinkedHashMap` for stoarge, to iterate in insertion order. |
+| `java.util.TreeSet` | A **set** using a `TreeMap` for storage, to iterate in natural sort order. |

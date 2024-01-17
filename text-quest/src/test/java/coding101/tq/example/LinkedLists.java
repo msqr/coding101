@@ -94,8 +94,8 @@ public class LinkedLists {
         }
 
         /**
-         * Iterate over all items in the list, invoking a callback function for each
-         * item.
+         * Iterate over all items in the list, invoking the {@code accept(item)}
+         * method on the provided callback function for each item.
          *
          * @param fn the callback function to call for every item in the list
          */

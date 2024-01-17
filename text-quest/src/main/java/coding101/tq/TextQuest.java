@@ -450,6 +450,7 @@ public class TextQuest {
                     itemToSell = nonEquippedItems.getFirst();
                 } else {
                     Coordinate inputPosition = ui.status().drawMessage(bundle.getString("shop.chooseItemToSell"), -1);
+                    screen.refresh();
                     Integer choice = game.readInteger(inputPosition.x(), inputPosition.y());
                     if (choice != null) {
                         if (choice > 0 && choice <= shop.itemsForSale().size()) {

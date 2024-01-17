@@ -415,7 +415,7 @@ public class TextQuest {
                 Coordinate inputPosition = ui.status().drawMessage(bundle.getString("shop.chooseItemToBuy"), -1);
                 screen.refresh();
                 Integer choice = game.readInteger(inputPosition.x() + 1, inputPosition.y());
-                if (choice == null || choice >= shop.itemsForSale().size()) {
+                if (choice == null || choice < 1 || choice > shop.itemsForSale().size()) {
                     ui.status().drawMessage(bundle.getString("shop.invalidChoice"), -1);
                     screen.refresh();
                     game.readYesNo();
@@ -452,7 +452,7 @@ public class TextQuest {
                     Coordinate inputPosition = ui.status().drawMessage(bundle.getString("shop.chooseItemToSell"), -1);
                     Integer choice = game.readInteger(inputPosition.x(), inputPosition.y());
                     if (choice != null) {
-                        if (choice < shop.itemsForSale().size()) {
+                        if (choice > 0 && choice <= shop.itemsForSale().size()) {
                             itemToSell = nonEquippedItems.get(choice - 1);
                         } else {
                             ui.status().drawMessage(bundle.getString("shop.invalidChoice"), -1);

@@ -1,6 +1,3 @@
-/**
- *
- */
 package coding101.tq.domain;
 
 import static java.util.Objects.requireNonNull;

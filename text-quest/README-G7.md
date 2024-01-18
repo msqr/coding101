@@ -115,6 +115,49 @@ public class SuperPowerfulWeapon implements InventoryItem {
 > annotation with an error if it does not actually override a method. This can help over time
 > as code evolves, to catch potential bugs when class hierarchies change.
 
+## About `ItemType` enum
+
+The [`ItemType`](./src/main/java/coding101/tq/domain/items/ItemType.java) enumeration defines
+the possible item _types_ in the game:
+
+```java
+public enum ItemType {
+
+    /** An item that adds defensive strength. */
+    Armor(true),
+
+    /** An item that adds offensive strength. */
+    Weapon(true),
+
+    /** An item that performs some magic. */
+    Potion(false),
+
+    /** Something else. */
+    Other(false);
+
+    private final boolean singleton;
+
+    private ItemType(boolean singleton) {
+        this.singleton = singleton;
+    }
+
+    /**
+     * Test if the item type can have multiple instances equipped or used at once.
+     *
+     * @return {@code true} if multiple items of the same type can be equipped at
+     *         the same time
+     */
+    public boolean canEquipMultiple() {
+        return !singleton;
+    }
+
+}
+```
+
+The `canEquipMultiple()` method returns `true` if a player can activate multiple items of the given
+type simultaneously. For example, the `Armor` type would return `false` which means a player should
+not be able to have both a dagger _and_ a sword active at the same time, just one or the other.
+
 ## The `PlayerItems` class
 
 A [`Player`](./src/main/java/coding101/tq/domain/Player.java) has a [`PlayerItems`](./src/main/java/coding101/tq/domain/PlayerItems.java)
@@ -192,7 +235,7 @@ public class PlayerItems {
 }
 ```
 
-Implement these two methods.
+> :gear: Implement these two methods.
 
 ## Task 2: equip/stash items
 
@@ -286,6 +329,24 @@ public interface InventoryItem {
 }
 ```
 
+> :gear: Implement the `PlayerItems` methods as detailed below.
+
+### Task 2a: equip item
+
+Implement the `PlayerItems` method `apply(item, player)`, using the following logic:
+
+ * Only **one** item of any **type** where `canEquipMultiple() == false` can be equipped at once. If
+   the `item` type meets this criteria, you must find any currently equipped item of the same type
+   and call `stash(item, player)` for that item. Recall that the `items` field holds a
+   `List<InventoryItem>` of all items in the player's inventory.
+ * Call the `apply(player)` method on the `item` to equip it.
+
+### Task 2b: stash item
+
+Implement the `PlayerItems` method `stash(item, player)`, using the following logic:
+
+ * Call the `stash(player)` method on the `item` to stash it.
+
 ## Task 3: compute equipped defensive/offensive totals
 
 During combat, the game needs to know how powerful the player's defencive and offensive (attack)
@@ -300,7 +361,8 @@ capabilities are. For example, imagine a player has the following items equipped
 |-----------------|---------|---------|
 | **Total**       |      +6 |     +15 |
 
-
+Here the player has a **total** defense capability, or **offset**, of +6 and a total offense offset
+of +15.
 
 ```java
 public class PlayerItems {
@@ -329,3 +391,112 @@ public class PlayerItems {
 
 }
 ```
+
+The `InventoryItem` interface has these methods to support this task:
+
+```java
+public interface InventoryItem {
+
+    /**
+     * Get a defensive score offset.
+     *
+     * @return a positive number for more defense, negative for less defense, or 0
+     *         for no change
+     */
+    default int getDefenseOffset() {
+        return 0;
+    }
+
+    /**
+     * Get an offense score offset.
+     *
+     * @return a positive number for more offense, negative for less offense, or 0
+     *         for no change
+     */
+    default int getOffenseOffset() {
+        return 0;
+    }
+
+    /**
+     * Get the number of uses left.
+     *
+     * @return a positive number for the remaining uses or a negative number for
+     *         unlimited
+     */
+    default int getRemainingUses() {
+        return -1;
+    }
+
+    /**
+     * Get the "strength" of the item.
+     *
+     * This method will return {@link #getDefenseOffset()} for {@code Armor} types,
+     * {@link #getOffenseOffset()} for {@code Weapon} types, or 0 otherwise. The
+     * special value {@literal -1} represents "maximum strength", for example a
+     * potion that restores all a player's possible health.
+     *
+     * @return the strength of the item
+     */
+    default int strength() {
+        return switch (type()) {
+            case Armor -> getDefenseOffset();
+            case Weapon -> getOffenseOffset();
+            default -> 0;
+        };
+    }
+
+}
+```
+
+> :gear: Implement the `PlayerItems` `equippedDefensiveOffsetTotal()` and
+> `equippedOffenseOffsetTotal()` methods, to calculate the **sum total** of all **equipped** items
+> that **have remaining uses**.
+
+## Task 4: test for immunity to terrain damage
+
+An item can provide protection from dangerous terrain, for example "magic lava boots" might stop
+a player from taking damage while walking on lava. The `InventoryItem` interface defines a helper
+method for this:
+
+```java
+public interface InventoryItem {
+
+    /**
+     * Test if an equipped item provides immunity to a given terrain.
+     *
+     * @param terrain the terrain to test
+     * @return {@code true} if some equipped item provides immunity to the given
+     *         terrain
+     */
+    public boolean immuneTo(TerrainType terrain) {
+        // TODO: return true if some equipped inventory item provides immunity
+        return false;
+    }
+
+}
+```
+
+The game thus needs to know, when moving around the map, if the player is immune to any damage
+a given terrain type might otherwise inflict on a player. The `PlayerItems` class has a
+method stub for this:
+
+```java
+public class PlayerItems {
+
+    /**
+     * Test if an equipped item provides immunity to a given terrain.
+     *
+     * @param terrain the terrain to test
+     * @return {@code true} if some equipped item provides immunity to the given
+     *         terrain
+     */
+    public boolean immuneTo(TerrainType terrain) {
+        // TODO: return true if some equipped inventory item provides immunity
+        return false;
+    }
+
+}
+```
+
+> :gear: Implement the `immuneTo(terrain)` method, so it returns `true` only if the
+> player has **some equipped item** where `item.immuneTo(terrain) == true`.

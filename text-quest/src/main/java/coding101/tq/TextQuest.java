@@ -458,7 +458,7 @@ public class TextQuest {
                 } else {
                     Coordinate inputPosition = ui.status().drawMessage(bundle.getString("shop.chooseItemToSell"), -1);
                     screen.refresh();
-                    Integer choice = game.readInteger(inputPosition.x(), inputPosition.y());
+                    Integer choice = game.readInteger(inputPosition.x() + 1, inputPosition.y());
                     if (choice != null) {
                         if (choice > 0 && choice <= shop.itemsForSale().size()) {
                             itemToSell = nonEquippedItems.get(choice - 1);
@@ -503,7 +503,7 @@ public class TextQuest {
         } else {
             Coordinate inputPosition = ui.status().drawMessage(bundle.getString("inventory.equip.choose"), -1);
             screen.refresh();
-            Integer choice = game.readInteger(inputPosition.x(), inputPosition.y());
+            Integer choice = game.readInteger(inputPosition.x() + 1, inputPosition.y());
             if (choice != null) {
                 if (choice > 0 && choice <= equipableItems.size()) {
                     var itemToEquip = equipableItems.get(choice - 1);

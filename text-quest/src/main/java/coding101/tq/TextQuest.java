@@ -540,7 +540,7 @@ public class TextQuest {
                     ui.status().drawMessage("", -1);
                     screen.refresh();
                 } else {
-                    ui.status().drawMessage(bundle.getString("inventory.invalidChoice"), -1);
+                    ui.status().drawMessage(bundle.getString("inventory.invalidChoice"), MESSAGE_CLEAR_DELAY);
                     screen.refresh();
                     game.readYesNo();
                 }

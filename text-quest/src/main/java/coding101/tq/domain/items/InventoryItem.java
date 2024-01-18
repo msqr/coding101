@@ -111,7 +111,8 @@ public interface InventoryItem extends Cloneable {
      * Equip or use this item on the player.
      *
      * @param player the player to apply the item to
-     * @return {@literal true} if the item was equipped or used
+     * @return {@code true} if the item was equipped or used; {@code false} if the
+     *         item was already equipped or could not be equipped
      */
     boolean apply(Player player);
 
@@ -119,7 +120,8 @@ public interface InventoryItem extends Cloneable {
      * Unequip an item from a player, but keep it in their inventory.
      *
      * @param player the player to unequip the item from
-     * @return {@literal true} if the item was stashed
+     * @return {@code true} if the item was stashed; {@code false} if the item was
+     *         already stashed or could not be stashed
      */
     boolean stash(Player player);
 

@@ -43,8 +43,10 @@ public abstract class BaseEquipableInventoryItem extends BaseInventoryItem {
     @Override
     public final boolean apply(Player player) {
         boolean result = !equipped;
-        equipped = true;
-        equip(player);
+        if (result) {
+            equipped = true;
+            equip(player);
+        }
         return result;
     }
 
@@ -60,8 +62,10 @@ public abstract class BaseEquipableInventoryItem extends BaseInventoryItem {
     @Override
     public final boolean stash(Player player) {
         boolean result = equipped;
-        equipped = false;
-        unEquip(player);
+        if (result) {
+            equipped = false;
+            unEquip(player);
+        }
         return result;
     }
 

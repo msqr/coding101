@@ -498,5 +498,5 @@ public class PlayerItems {
 }
 ```
 
-> :gear: Implement the `immuneTo(terrain)` method, so it returns `true` only if the
-> player has **some equipped item** where `item.immuneTo(terrain) == true`.
+> :gear: Implement the `immuneTo(terrain)` method, so it returns `true` only if the player has
+> **some equipped item** that **has remaining uses** where `item.immuneTo(terrain) == true`.

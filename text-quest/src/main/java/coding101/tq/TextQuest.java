@@ -510,9 +510,10 @@ public class TextQuest {
                     player.getItems().apply(itemToEquip, player);
                     ui.info().drawItems();
                     ui.health().draw();
+                    ui.status().drawMessage("", -1);
                     screen.refresh();
                 } else {
-                    ui.status().drawMessage(bundle.getString("shop.invalidChoice"), -1);
+                    ui.status().drawMessage(bundle.getString("inventory.invalidChoice"), MESSAGE_CLEAR_DELAY);
                     screen.refresh();
                     game.readYesNo();
                 }
@@ -522,7 +523,30 @@ public class TextQuest {
     }
 
     private void stashItem() throws IOException {
-
+        var stashableItems = ui.info().equippedItemsByType().values().stream()
+                .flatMap(list -> list.stream())
+                .toList();
+        if (stashableItems.isEmpty()) {
+            ui.status().drawMessage(bundle.getString("inventory.stash.noneAvailable"), MESSAGE_CLEAR_DELAY);
+        } else {
+            Coordinate inputPosition = ui.status().drawMessage(bundle.getString("inventory.stash.choose"), -1);
+            screen.refresh();
+            Integer choice = game.readInteger(inputPosition.x() + 1, inputPosition.y());
+            if (choice != null) {
+                if (choice > 0 && choice <= stashableItems.size()) {
+                    var itemToStash = stashableItems.get(choice - 1);
+                    player.getItems().stash(itemToStash, player);
+                    ui.info().drawItems();
+                    ui.status().drawMessage("", -1);
+                    screen.refresh();
+                } else {
+                    ui.status().drawMessage(bundle.getString("inventory.invalidChoice"), -1);
+                    screen.refresh();
+                    game.readYesNo();
+                }
+            }
+        }
+        screen.refresh();
         screen.refresh();
     }
 

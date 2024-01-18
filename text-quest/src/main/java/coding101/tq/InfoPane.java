@@ -92,6 +92,11 @@ public class InfoPane implements Pane {
         int valueDisplayCol = col + width - value.length();
         game.textGraphics()
                 .setForegroundColor(color(game.settings().colors().foreground().uiBorder(), ANSI.WHITE));
+
+        // need to re-draw border in case separator moved
+        game.textGraphics().setCharacter(col - 1, row, Symbols.DOUBLE_LINE_VERTICAL);
+        game.textGraphics().setCharacter(col + width, row, Symbols.DOUBLE_LINE_VERTICAL);
+
         for (int i = col + label.length(); i < valueDisplayCol; i++) {
             game.textGraphics().setCharacter(i, row, '.');
         }
@@ -177,6 +182,7 @@ public class InfoPane implements Pane {
                     break;
                 }
                 String label = itemDisplayName(item);
+                label = "%d %s".formatted(currItemIndex + 1, label);
                 String value = itemDisplayValue(item);
                 drawItem(label, value, left, displayRow++);
                 currItemIndex++;
@@ -192,6 +198,10 @@ public class InfoPane implements Pane {
         game.textGraphics().setCharacter(left - 1, displayRow, Symbols.DOUBLE_LINE_T_SINGLE_RIGHT);
         game.textGraphics().drawLine(left, displayRow, right, displayRow, Symbols.SINGLE_LINE_HORIZONTAL);
         game.textGraphics().setCharacter(right + 1, displayRow, Symbols.DOUBLE_LINE_T_SINGLE_LEFT);
+
+        // redraw left/right borders in case stashed items
+        game.textGraphics().drawLine(left - 1, displayRow + 1, left - 1, bottom, Symbols.DOUBLE_LINE_VERTICAL);
+        game.textGraphics().drawLine(right + 1, displayRow + 1, right + 1, bottom, Symbols.DOUBLE_LINE_VERTICAL);
         displayRow++;
 
         // group non-equipped items by type

@@ -62,6 +62,7 @@ public class TextQuest {
 
     private static char INTERACT_KEY = ' ';
     private static char SAVE_KEY = 's';
+    private static char EQUIP_KEY = 'e';
 
     private final Screen screen;
     private final Settings settings;
@@ -268,6 +269,12 @@ public class TextQuest {
                 } else if (key == SAVE_KEY) {
                     // save game
                     saveGame();
+                } else if (key == EQUIP_KEY) {
+                    if (keyStroke.isShiftDown()) {
+                        stashItem();
+                    } else {
+                        equipItem();
+                    }
                 }
             }
         }
@@ -484,6 +491,38 @@ public class TextQuest {
                 break;
             }
         }
+        screen.refresh();
+    }
+
+    private void equipItem() throws IOException {
+        var equipableItems = ui.info().equipableItemsByType().values().stream()
+                .flatMap(list -> list.stream())
+                .toList();
+        if (equipableItems.isEmpty()) {
+            ui.status().drawMessage(bundle.getString("inventory.equip.noneAvailable"), MESSAGE_CLEAR_DELAY);
+        } else {
+            Coordinate inputPosition = ui.status().drawMessage(bundle.getString("inventory.equip.choose"), -1);
+            screen.refresh();
+            Integer choice = game.readInteger(inputPosition.x(), inputPosition.y());
+            if (choice != null) {
+                if (choice > 0 && choice <= equipableItems.size()) {
+                    var itemToEquip = equipableItems.get(choice - 1);
+                    player.getItems().apply(itemToEquip, player);
+                    ui.info().drawItems();
+                    ui.health().draw();
+                    screen.refresh();
+                } else {
+                    ui.status().drawMessage(bundle.getString("shop.invalidChoice"), -1);
+                    screen.refresh();
+                    game.readYesNo();
+                }
+            }
+        }
+        screen.refresh();
+    }
+
+    private void stashItem() throws IOException {
+
         screen.refresh();
     }
 

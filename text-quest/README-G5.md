@@ -109,7 +109,7 @@ In Java a linked list element class might look like this:
  * 
  * @param <T> the item type
  */
-public static class LinkedListElement<T> {
+public class LinkedListElement<T> {
 
     private final T item;              // the element value
     private LinkedListElement<T> next; // the next element

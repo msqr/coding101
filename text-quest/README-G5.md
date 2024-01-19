@@ -76,23 +76,25 @@ At this point, `dest` has 4 elements and looks like `[1, 2, 3, 4]`. Wonderful!
 
 ## Second idea: linked list
 
-What if we wanted to have a list of **ten zillion** items, but for whatever reason it
-was not possible to have an array of **ten zillion** length. How could we manage this?
-One solution is what is known as a **linked list**. A linked list is a classic computing
-data structure, where the elements of the list include a reference, or **link**, to 
-the **next** item in the list. You can visualize it like this:
+What if we wanted to have a list of **ten zillion** items, but for whatever reason it was not
+possible to have an array of **ten zillion** length. How could we manage this? One solution is what
+is known as a **linked list**. A linked list is a classic computing data structure, where we wrap
+each item in a **container element** that includes a reference, or **link**, to the **next** element
+in the list. For example, visualize a linked lists of strings like this:
 
 ```
-+--------+     +--------+     +--------+
-| Item 1 |     | Item 2 |     | Item 3 |
-| Next ------->| Next ------->| Next   |
-+--------+     +--------+     +--------+
++---------------+     +----------------+     +----------------+
+| Element       |     | Element        |     | Element        |
++---------------+     +----------------+     +----------------+
+| Item: "apple" |     | Item: "banana" |     | Item: "cherry" |
+| Next:  ------------>| Next: -------------->| Next:          |
++---------------+     +----------------+     +----------------+
 ```
 
-Notice how Item 3's `Next` links to nothing: that signals the end of the list. These
-squares in the diagram are the **list elements** and you can think of these very much
-like little boxes that hold the actual item you want along with the directions to 
-the next box. In Java a list element class might look like this:
+Notice how the last elements's `Next` links to **nothing**: that signals the end of the list. These
+squares in the diagram are the **list elements** and you can think of these very much like little
+boxes that hold the actual item you want along with the directions to the next box. In Java a linked
+list element class might look like this:
 
 ```java
 /**
@@ -151,6 +153,56 @@ like this:
 var element = new LinkedListElement<String>("foobar");
 // element.item() returns "foobar"
 ```
+
+#### Linked list class
+
+Now that we have defined our linked list **element** class in `LinkedListElement<T>`, we can define
+an actual linked list class. The class structure is actually pretty simple: the only thing a linked
+list class needs to "know" is what the starting, or **head** element of the list is. Once you have
+the head of the list, that means you could use the **next** link on each element to make your way to
+any other element in the list. You can visualize the list like this:
+
+```
++-----------------------------------------------------------------+
+| Linked List                                                     |
++-----------------------------------------------------------------+
+| Head: --+                                                       |
+|         |                                                       |
+|         v                                                       |
+| +---------------+     +----------------+     +----------------+ |
+| | Element       |     | Element        |     | Element        | |
+| +---------------+     +----------------+     +----------------+ |
+| | Item: "apple" |     | Item: "banana" |     | Item: "cherry" | |
+| | Next:  ------------>| Next: -------------->| Next:          | |
+| +---------------+     +----------------+     +----------------+ |
+|                                                                 |
++-----------------------------------------------------------------+
+```
+
+Here the `Head` property points to the first element in the list.
+
+> :question: If the list was empty, what does `Head` point to?
+
+In Java a linked list class might look like this (using the `LinkedListElement<T>` class
+for elements):
+
+```java
+public class LinkedList<T> {
+
+    // the head element, or start, of the list
+    private LinkedListElement<T> head;
+
+}
+```
+
+Here the `LinkedList<T>` class defines a `head` property of type `LinkedListElement<T>`, where
+`head` represents the first element in the list.
+
+> :bulb: Remember that the `<T>` syntax is used as a placeholder for the **type of item** stored in
+> the list... like `String` or `Integer`. In your head, whenever you see `T` you might replace that
+> with `String`. If you think about it, a linked list does not care what the items in the list 
+> actually are. The list's only job is to maintain a collection of "things" in order. The "things"
+> themselves are of no real consequence.
 
 ### Iterate over a linked list
 

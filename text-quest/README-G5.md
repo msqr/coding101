@@ -93,8 +93,15 @@ in the list. For example, visualize a linked lists of strings like this:
 
 Notice how the last elements's `Next` links to **nothing**: that signals the end of the list. These
 squares in the diagram are the **list elements** and you can think of these very much like little
-boxes that hold the actual item you want along with the directions to the next box. In Java a linked
-list element class might look like this:
+boxes that hold the actual item you want along with the directions to the next box.
+
+> :point_up: Pay close attention to the terms **item** and **element** in this context. Remember
+> that _item_ is the actual thing you want to have a list of, for example strings like "a", "b", and
+> "c" or numbers like 1, 2, and 3. Then remember that _element_ is the _container_ for an _item_,
+> that includes a _link to the next element in the list_. So even though **conceptually** we 
+> want a list of _items_, in a linked list **implementation** we have a list of _elements_.
+
+In Java a linked list element class might look like this:
 
 ```java
 /**
